@@ -7,10 +7,37 @@
         Ellipse:
             pos: root.pos
             size: self.width - 2, self.height - 2
+<MonthNavigationBoxLayout>:
+    orientation: 'horizontal'
+    Button:
+        text: "<"
+        size_hint: .1, 1
+        on_press: root.previous_month_on_press(self)
+    Label:
+        text: '[u][ref=header]' + root.month_header_label + '[/ref][/u]'
+        markup: True
+        font_size: 30
+        on_ref_press: root.ref_pressed()
+    Button:
+        text: ">"
+        size_hint: .1, 1
+        on_press: root.next_month_on_press(self)
+<DaysOfWeekBoxLayout>:
+    orientation: 'horizontal'
+    size: root.size
+    pos: root.pos
+    color: 1, 1, 1, 1
 <CalendarGrid>:
-    GridLayout:
-        size: root.width, root.height
-        cols: 7
-        rows: 7
-        padding: 5
-        spacing: 2.5
+    BoxLayout:
+        size: root.size
+        orientation: 'vertical'
+        MonthNavigationBoxLayout:
+            size_hint: 1, .1
+        DaysOfWeekBoxLayout:
+            size_hint: 1, .05
+        GridLayout:
+            size: root.width, root.height
+            cols: 7
+            rows: 7
+            padding: 5
+            spacing: 2.5
