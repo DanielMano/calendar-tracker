@@ -1,0 +1,16 @@
+<DayActivityIcon>:
+    background_normal: ""
+    on_press: root.get_day_info()
+    canvas.after:
+        Color:
+            rgba: root.icon_color
+        Ellipse:
+            pos: root.pos
+            size: self.width - 2, self.height - 2
+<CalendarGrid>:
+    GridLayout:
+        size: root.width, root.height
+        cols: 7
+        rows: 7
+        padding: 5
+        spacing: 2.5
