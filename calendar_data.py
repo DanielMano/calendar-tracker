@@ -19,3 +19,10 @@ def get_month_range(year, month):
     # returns (weekday of first day of month, days in the month)
     # the weekday numbers are: 0 = MONDAY, 1 = TUESDAY, ..., 6 = SUNDAY
     return calendar.monthrange(year, month)
+
+def get_day_names():
+    day_names = []
+    for day in range(0, 7):
+        day_names.append(calendar.day_name[day])
+    day_names.insert(0, day_names.pop(6))
+    return day_names
