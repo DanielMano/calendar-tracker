@@ -1,43 +1,49 @@
-<DayActivityIcon>:
-    background_normal: ""
-    on_press: root.get_day_info()
-    canvas.after:
-        Color:
-            rgba: root.icon_color
-        Ellipse:
-            pos: root.pos
-            size: self.width - 2, self.height - 2
-<MonthNavigationBoxLayout>:
-    orientation: 'horizontal'
-    Button:
-        text: "<"
-        size_hint: .1, 1
-        on_press: root.previous_month_on_press(self)
-    Label:
-        text: '[u][ref=header]' + root.month_header_label + '[/ref][/u]'
-        markup: True
-        font_size: 30
-        on_ref_press: root.ref_pressed()
-    Button:
-        text: ">"
-        size_hint: .1, 1
-        on_press: root.next_month_on_press(self)
-<DaysOfWeekBoxLayout>:
-    orientation: 'horizontal'
-    size: root.size
-    pos: root.pos
-    color: 1, 1, 1, 1
-<CalendarGrid>:
+<ScreenManager>:
+<CalendarScreen>:
+    name: ''
     BoxLayout:
-        size: root.size
         orientation: 'vertical'
-        MonthNavigationBoxLayout:
-            size_hint: 1, .1
-        DaysOfWeekBoxLayout:
-            size_hint: 1, .05
+        BoxLayout:
+            id: header_layout
+            size_hint_y: .2
+            Button:
+                id: left_btn
+                text: 'Left Screen'
+                on_press: root.prev_month()
+            Label:
+                id: header_label
+                text: ''
+            Button:
+                id: right_btn
+                text: 'Right Screen'
+                on_press: root.next_month()
+        BoxLayout:
+            id: day_labels
+            size_hint_y: .1
+            orientation: 'horizontal'
+            Label:
+                text: "SUNDAY"
+            Label:
+                text: "MONDAY"
+            Label:
+                text: "TUESDAY"
+            Label:
+                text: "WEDNESDAY"
+            Label:
+                text: "THURSDAY"
+            Label:
+                text: "FRIDAY"
+            Label:
+                text: "SATURDAY"
         GridLayout:
-            size: root.width, root.height
+            id: day_grid
             cols: 7
-            rows: 7
-            padding: 5
-            spacing: 2.5
+<DayPopupLayout>:
+    orientation: 'vertical'
+    Label:
+        id: y_m
+    Label:
+        id: day
+    Button:
+        id: dismiss
+        text: "Return"
