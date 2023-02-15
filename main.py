@@ -1,104 +1,99 @@
-import kivy
-from kivy.uix.gridlayout import GridLayout
 from kivy.app import App
-from kivy.lang.builder import Builder
-from kivy.uix.widget import Widget
 from kivy.uix.button import Button
 from kivy.uix.boxlayout import BoxLayout
-from kivy.uix.label import Label
-from kivy.uix.relativelayout import RelativeLayout
-from kivy.properties import ListProperty, NumericProperty, StringProperty
-
-from ast import literal_eval
+from kivy.uix.screenmanager import ScreenManager, Screen
+from kivy.uix.popup import Popup
 
 import calendar_data
-#Builder.load_file('calendartracker.kv')
 
-class CalendarGrid(Widget):
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
-        
-        self.init_data()
-
-        #print(self.children[0].children)
-        self.day_grid_layout = self.children[0].children[0]
-        self.day_name_box_layout = self.children[0].children[1]
-        self.month_navigation_box_layout = self.children[0].children[2]
-        
-        for name in range(len(self.weekday_names)):
-            self.day_name_box_layout.add_widget(Label(text=f"{self.weekday_names[name]}"))
-                
-        for row in range(6):
-            for column in range(7):
-                daynum = self.active_month_array[row][column]
-                #TODO if daynum = 0, replace with correct days from either last or next month
-                self.day_grid_layout.add_widget(self.add_day_tile_layout(column, row, daynum))
-                    
+class ScreenManager(ScreenManager):
     def init_data(self):
-        self.active_date = calendar_data.get_today_date()
-        self.active_month_array = calendar_data.get_month_data(self.active_date.year, self.active_date.month)
-        self.weekday_names = calendar_data.get_day_names()
-        if len(self.active_month_array) < 6:
-            self.active_month_array.append([0, 0, 0, 0, 0, 0, 0])
+        # YYYY, M where [1-12], D
+        self.active_year, self.active_month, self.active_day = calendar_data.get_today_date_string()
+        # List of month names where 0 = '', 1 = 'January', and 12 = 'December'
         self.month_names = calendar_data.get_month_names()
-                
-    def add_day_tile_layout(self, column, row, daynum):
-        box_layout = BoxLayout(orientation='vertical')
-        box_layout.add_widget(Button(text=f"{daynum}"))
-        box_layout.add_widget(self.add_icon_grid_to_day_tile(column, row))
-        return box_layout
+
+    def prev_month(self):
+        cal_app.sm.active_month -= 1
+        cal_app.sm.transition.direction = 'right'
+        self.create_month_screen()
     
-    def add_icon_grid_to_day_tile(self, column, row):
-        grid_layout = GridLayout(rows=2)
-        for position in range(8):
-            grid_layout.add_widget(DayActivityIcon(column=column, row=row, position=position))
-        return grid_layout
-
-
-class DayActivityIcon(Button):
-    background_color = ListProperty((0, 0, 0, 1))
-    icon_color = ListProperty((0.2, 0.6, 1, 1))
-    column = NumericProperty(0)
-    row = NumericProperty(0)
-    position = NumericProperty(0)
+    def next_month(self):
+        cal_app.sm.active_month += 1
+        cal_app.sm.transition.direction = 'left'
+        self.create_month_screen()
+    
+    def day_press(self, instance):
+        # Create popup for day
+        popup = Popup(size_hint =(None, None), size =(self.width * .8, self.height * .8))
+        # Set title
+        popup.title = f"{self.active_month} / {instance.text} / {self.active_year}"
+        popup.title_align = 'center'
+        popup.title_size = 30
+        # Set layout
+        layout = DayPopupLayout()
+        layout.ids.y_m.text = f"{self.active_year} - {self.active_month}"
+        layout.ids.day.text = f"{instance.text}"
+        layout.ids.dismiss.bind(on_release=popup.dismiss)
+        popup.content = layout
+        
+        # Open popup for day
+        popup.open()
+    
+    def create_month_screen(self):
+        # If month is December or January, loop month and inc/dec year
+        if self.active_month == 13:
+            self.active_month = 1
+            self.active_year += 1
+        elif self.active_month == 0:
+            self.active_month = 12
+            self.active_year -= 1
             
-    def get_day_info(self):
-        print(f"Pressed on day: {self.column}, {self.row}, {self.position}")
-
-
-class MonthNavigationBoxLayout(BoxLayout):
-    month_header_label = StringProperty()
-    
-    display_month = calendar_data.get_today_date().month
-    month_names = calendar_data.get_month_names()
-    month_header_label = str(month_names[display_month-1])
-    
-    def previous_month_on_press(self, instance):
-        # will have to implement screenmanager to go between months
-        #print(self)
-        #print(instance)
-        print("previous month")
-    
-    def next_month_on_press(self, instance):
-        # will have to implement screenmanager to go between months
-        #print(self)
-        #print(instance)
-        print("next month")
+        # Set the name of the new screen
+        active_name = f"{self.active_year}-{self.month_names[self.active_month]}"
         
-    def ref_pressed(self):
-        # TODO bring up month and year picker
-        pass
+        # If a screen with this name doesn't exist, create it
+        if not cal_app.sm.has_screen(active_name):
+            scr = CalendarScreen()
+            scr.name = active_name
+            
+            # Change data for new screen
+            scr.ids.header_label.text = scr.name
+            
+            # Get list of lists where each list is a week starting at sunday
+            month = calendar_data.get_days_of_month_of_year(self.active_year, self.active_month)
+            
+            for week in month:
+                for day in week:
+                    btn = Button(text=str(day))
+                    btn.bind(on_press=self.day_press)
+                    scr.ids.day_grid.add_widget(btn)
+            cal_app.sm.add_widget(scr)
+            
+        # Switch to new screen
+        cal_app.sm.current = active_name
+
+class CalendarScreen(Screen):
+    def prev_month(self):
+        cal_app.sm.prev_month()
         
-class DaysOfWeekBoxLayout(BoxLayout):
+    def next_month(self):
+        cal_app.sm.next_month()
+        
+class DayPopupLayout(BoxLayout):
     pass
 
 class CalendarTrackerApp(App):
     def build(self):
-        return CalendarGrid()
-
-def main():
-    CalendarTrackerApp().run()
+        # Create screen manager
+        self.sm = ScreenManager()
+        self.sm.init_data()
+        # Create and display current month screen on startup
+        self.sm.create_month_screen()
+        
+        return self.sm
 
 
 if __name__ == '__main__':
-    main()
+    cal_app = CalendarTrackerApp()
+    cal_app.run()
