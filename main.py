@@ -3,6 +3,10 @@ from kivy.uix.button import Button
 from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.screenmanager import ScreenManager, Screen
 from kivy.uix.popup import Popup
+from kivy.uix.stacklayout import StackLayout
+from kivy.uix.label import Label
+from kivy.uix.widget import Widget
+from kivy.properties import ListProperty
 
 import calendar_data
 
@@ -64,14 +68,21 @@ class ScreenManager(ScreenManager):
             month = calendar_data.get_days_of_month_of_year(self.active_year, self.active_month)
             
             for week in month:
-                for day in week:
-                    btn = Button(text=str(day))
-                    btn.bind(on_press=self.day_press)
+                for day in week:                    
+                    btn = self.add_day(day)
                     scr.ids.day_grid.add_widget(btn)
             cal_app.sm.add_widget(scr)
             
         # Switch to new screen
         cal_app.sm.current = active_name
+    
+    def add_day(self, day):
+        btn = DayTile()
+        btn.ids.day.bind(on_press=self.day_press)
+        btn.ids.day.text = str(day)
+        # TODO: get data from database
+        
+        return btn
 
 class CalendarScreen(Screen):
     def prev_month(self):
@@ -83,6 +94,11 @@ class CalendarScreen(Screen):
 class DayPopupLayout(BoxLayout):
     pass
 
+class DayTile(Widget):
+    pass
+class DayIcon(Label):
+    event_color = ListProperty(())
+    pass
 class CalendarTrackerApp(App):
     def build(self):
         # Create screen manager

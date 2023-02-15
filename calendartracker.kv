@@ -47,3 +47,27 @@
     Button:
         id: dismiss
         text: "Return"
+<DayTile>:
+    orientation: 'vertical'
+    Button:
+        pos: root.pos
+        size: root.size
+        id: day
+        text: "temp"
+        text_size: None, root.height * .6
+        valign: 'top'
+        font_size: 25
+    GridLayout:
+        id: event_grid
+        pos: root.pos
+        size: root.width, root.height * .5
+        cols: 6
+        col_default_width: root.width / 7
+        padding: 5
+<DayIcon>:
+    canvas:
+        Color:
+            rgba: root.event_color
+        Ellipse:
+            size: root.width * .7 , root.width * .7
+            pos: self.pos[0] + self.width * .15, self.pos[1] + self.width * .15
