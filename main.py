@@ -5,6 +5,7 @@ from kivy.uix.screenmanager import ScreenManager, Screen
 from kivy.uix.popup import Popup
 
 import calendar_data
+import database
 
 class ScreenManager(ScreenManager):
     def init_data(self):
@@ -95,5 +96,7 @@ class CalendarTrackerApp(App):
 
 
 if __name__ == '__main__':
+    conn = database.create_connection("database.db")    
+    
     cal_app = CalendarTrackerApp()
     cal_app.run()
