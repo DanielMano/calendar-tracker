@@ -4,6 +4,9 @@ from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.screenmanager import ScreenManager, Screen
 from kivy.uix.popup import Popup
 
+from kivymd.app import MDApp
+from kivymd.uix.boxlayout import MDBoxLayout
+
 import calendar_data
 import database
 
@@ -81,10 +84,10 @@ class CalendarScreen(Screen):
     def next_month(self):
         cal_app.sm.next_month()
         
-class DayPopupLayout(BoxLayout):
+class DayPopupLayout(MDBoxLayout):
     pass
 
-class CalendarTrackerApp(App):
+class CalendarTrackerApp(MDApp):
     def build(self):
         # Create screen manager
         self.sm = ScreenManager()
