@@ -1,3 +1,6 @@
+from kivy.config import Config
+Config.set('graphics', 'width', '500')
+Config.set('graphics', 'height', '1000')
 from kivy.app import App
 from kivy.uix.button import Button
 from kivy.uix.boxlayout import BoxLayout
@@ -95,6 +98,9 @@ class CalendarTrackerApp(MDApp):
         # Create and display current month screen on startup
         self.sm.create_month_screen()
         
+        self.theme_cls.theme_style = "Dark"
+        self.theme_cls.primary_palette = "Teal"
+
         return self.sm
 
 
