@@ -1,3 +1,6 @@
+from kivy.config import Config
+Config.set('graphics', 'width', '500')
+Config.set('graphics', 'height', '1000')
 from kivy.app import App
 from kivy.uix.button import Button
 from kivy.uix.boxlayout import BoxLayout
@@ -8,7 +11,11 @@ from kivy.uix.label import Label
 from kivy.uix.widget import Widget
 from kivy.properties import ListProperty
 
+from kivymd.app import MDApp
+from kivymd.uix.boxlayout import MDBoxLayout
+
 import calendar_data
+import database
 
 class ScreenManager(ScreenManager):
     def init_data(self):
@@ -91,7 +98,7 @@ class CalendarScreen(Screen):
     def next_month(self):
         cal_app.sm.next_month()
         
-class DayPopupLayout(BoxLayout):
+class DayPopupLayout(MDBoxLayout):
     pass
 
 class DayTile(Widget):
@@ -99,7 +106,7 @@ class DayTile(Widget):
 class DayIcon(Label):
     event_color = ListProperty(())
     pass
-class CalendarTrackerApp(App):
+class CalendarTrackerApp(MDApp):
     def build(self):
         # Create screen manager
         self.sm = ScreenManager()
@@ -107,9 +114,14 @@ class CalendarTrackerApp(App):
         # Create and display current month screen on startup
         self.sm.create_month_screen()
         
+        self.theme_cls.theme_style = "Dark"
+        self.theme_cls.primary_palette = "Teal"
+
         return self.sm
 
 
 if __name__ == '__main__':
+    conn = database.create_connection("database.db")    
+    
     cal_app = CalendarTrackerApp()
     cal_app.run()
