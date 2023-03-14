@@ -93,6 +93,7 @@ def create_event(conn, event):
 # Add a date to the dates table
 # Returns the date_id
 def create_date(conn, date):
+    #TODO create a method to add dates in batches, prevents creation and deletion of multiple cursors
     sql = """
         INSERT INTO dates(day, event_id) VALUES(?,?)
         """
@@ -137,7 +138,68 @@ def get_events_by_day(conn, day):
 # Get all colors
 # Returns list of (ids, hexcodes)
 def get_colors(conn):
+    """_summary_
+
+    Args:
+        conn (_type_): _description_
+
+    Returns:
+        _type_: _description_
+    """
     sql = "SELECT * FROM colors"
     cursor = conn.cursor()
     cursor.execute(sql)
+    return cursor.fetchall()
+    
+def get_events(conn):
+    """Returns list of (event_id, name, hexcode)
+
+    Args:
+        conn (sqlite3.Connection): Connection to database
+
+    Returns:
+        list: Return all rows as a list where each row is a tuple of
+        (int: event_id, str: name, str: hexcode) where hexcode is
+        missing the #
+    """
+    sql = """
+        SELECT events.event_id, events.name, colors.hexcode 
+        FROM events, colors
+        WHERE events.color_id = colors.color_id
+        """
+    cursor = conn.cursor()
+    cursor.execute(sql)
+    return cursor.fetchall()
+
+def get_event_ids_by_day(conn, day_string):
+    """Return list of event_ids -> int
+
+    Args:
+        conn (sqlite3.Connection): db connection
+        day_string (str): string of date to search db for
+
+    Returns:
+        list: Return all rows as a list where each row is (event_id,)
+    """
+    sql = """
+        SELECT dates.event_id FROM dates, events
+        WHERE dates.event_id = events.event_id AND dates.day=?
+        """
+    cursor = conn.cursor()
+    cursor.execute(sql, (day_string,))
+    return cursor.fetchall()
+
+def delete_event_from_day_by_event_id(conn, day_string, e_id):
+    """Deletes from dates table an event by event_id for given day
+
+    Args:
+        conn (sqlite3.Connection): db connection
+        day_string (str): string of date
+        e_id (int): event_id
+    """
+    sql = """
+        DELETE FROM dates WHERE day=? and event_id=?
+        """
+    cursor = conn.cursor()
+    cursor.execute(sql, (day_string, e_id,))
     conn.commit()

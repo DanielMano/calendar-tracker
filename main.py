@@ -89,8 +89,12 @@ class ScreenManager(ScreenManager):
         btn = DayTile()
         btn.ids.day_tile.bind(on_press=self.day_press)
 
-        if day == self.today[2] and self.active_month == self.today[1] and self.active_year == self.today[0]:
-            # If today's date, set day selection, text color to white, and underline text
+        if (
+            day == self.today[2] 
+            and self.active_month == self.today[1] 
+            and self.active_year == self.today[0]
+        ):
+            # If its today, outline day, set text to white, and underline text
             btn.ids.day_tile.line_color = cal_app.theme_cls.primary_light
             btn.ids.day_tile.text = f"[u]{day}[/u]"
             btn.ids.day_tile.text_color = "orange"
