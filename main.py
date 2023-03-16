@@ -17,6 +17,7 @@ from kivymd.uix.button import MDIconButton
 
 import calendar_data
 import database
+import update_events_dialog as update_dialog
 
 class ScreenManager(ScreenManager):
     def init_data(self):
@@ -97,7 +98,8 @@ class ScreenManager(ScreenManager):
     def add_day(self, day, screen):
         btn = DayTile()
         btn.ids.day_tile.bind(on_press=screen.day_press)
-
+        #btn.ids.day_tile.bind(on_press=lambda instance: screen.day_press_test(instance, f"{self.active_year}-{self.active_month}-{day}"))
+        btn.day_string = f"{self.active_year}-{self.active_month}-{day}"
         if (
             day == self.today[2] 
             and self.active_month == self.today[1] 
@@ -133,6 +135,7 @@ class ScreenManager(ScreenManager):
 
 class CalendarScreen(Screen):
     selected_day = None
+    dialog_dict = {}
     def prev_month(self):
         cal_app.sm.prev_month()
         
@@ -141,24 +144,32 @@ class CalendarScreen(Screen):
     
     def get_selected(self):
         # TODO: use this to open dialog from update_events_dialog
-        print("screen:", self, "selected_day:", self.selected_day, "-->", self.selected_day.ids.day_tile.text)
+        print("screen:", self, "selected_day:", self.selected_day, "-->", self.selected_day.ids.day_tile.text, "-->", self.selected_day.day_string)
+        if not self.dialog_dict.get(self.selected_day.day_string):
+            self.dialog_dict[self.selected_day.day_string] = update_dialog.create_update_events_dialog(self, conn, self.selected_day.day_string)
+        self.dialog_dict.get(self.selected_day.day_string).open()
     
     def day_press(self, instance):
+        #print("self:", self, "instance:", instance, "day_string:", day_string)
         self.selected_day.ids.day_tile.line_color = [0, 0, 0, 0]
         instance.line_color = cal_app.theme_cls.primary_light
         self.selected_day = instance.parent
         # TODO: update lower layout to display currently selected events
-        
+
 class DayPopupLayout(MDBoxLayout):
     pass
 
 class DayTile(Widget):
+    day_string = None
     pass
 
 class CalendarTrackerApp(MDApp):
     def build(self):
         self.theme_cls.theme_style = "Dark"
         self.theme_cls.primary_palette = "Teal"
+        
+        # Initiate update dialog kv
+        update_dialog.init_dialog_data(conn)
         
         # Create screen manager
         self.sm = ScreenManager()
