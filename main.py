@@ -36,7 +36,7 @@ class ScreenManager(ScreenManager):
         cal_app.sm.transition.direction = 'left'
         self.create_month_screen()
     
-    def day_press(self, instance):
+    '''def day_press(self, instance):
         # Create popup for day
         popup = Popup(size_hint =(None, None), size =(self.width * .8, self.height * .8))
         # Set title
@@ -51,7 +51,7 @@ class ScreenManager(ScreenManager):
         popup.content = layout
         
         # Open popup for day
-        popup.open()
+        popup.open()'''
     
     def create_month_screen(self):
         # If month is December or January, loop month and inc/dec year
@@ -78,26 +78,36 @@ class ScreenManager(ScreenManager):
             
             for week in month:
                 for day in week:                    
-                    btn = self.add_day(day)
+                    btn = self.add_day(day, scr)
                     scr.ids.day_grid.add_widget(btn)
+            
+            # If today's date isn't in this screen's month, select the first of
+            # the month and outline it
+            if scr.selected_day == None:
+                for child in scr.ids.day_grid.children:
+                    if child.ids.day_tile.text == '1':
+                        scr.selected_day = child
+                        child.ids.day_tile.line_color = cal_app.theme_cls.primary_light
+
             cal_app.sm.add_widget(scr)
             
         # Switch to new screen
         cal_app.sm.current = active_name
     
-    def add_day(self, day):
+    def add_day(self, day, screen):
         btn = DayTile()
-        btn.ids.day_tile.bind(on_press=self.day_press)
+        btn.ids.day_tile.bind(on_press=screen.day_press)
 
         if (
             day == self.today[2] 
             and self.active_month == self.today[1] 
             and self.active_year == self.today[0]
         ):
-            # If its today, outline day, set text to white, and underline text
-            btn.ids.day_tile.line_color = cal_app.theme_cls.primary_light
+            # If its today, select day, set text to orange, and underline text
             btn.ids.day_tile.text = f"[u]{day}[/u]"
             btn.ids.day_tile.text_color = "orange"
+            screen.selected_day = btn
+            btn.ids.day_tile.line_color = cal_app.theme_cls.primary_light
         else:
             btn.ids.day_tile.line_color = [0, 0, 0, 0]
             btn.ids.day_tile.text = str(day)
@@ -122,11 +132,22 @@ class ScreenManager(ScreenManager):
         
 
 class CalendarScreen(Screen):
+    selected_day = None
     def prev_month(self):
         cal_app.sm.prev_month()
         
     def next_month(self):
         cal_app.sm.next_month()
+    
+    def get_selected(self):
+        # TODO: use this to open dialog from update_events_dialog
+        print("screen:", self, "selected_day:", self.selected_day, "-->", self.selected_day.ids.day_tile.text)
+    
+    def day_press(self, instance):
+        self.selected_day.ids.day_tile.line_color = [0, 0, 0, 0]
+        instance.line_color = cal_app.theme_cls.primary_light
+        self.selected_day = instance.parent
+        # TODO: update lower layout to display currently selected events
         
 class DayPopupLayout(MDBoxLayout):
     pass
