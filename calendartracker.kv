@@ -4,12 +4,20 @@
     icon_color: "white"
     pos_hint: {"center_x": .5, "center_y": .5}
 
+<LowerLayoutLabel>:
+    text: "WHY?"
+    halign: 'center'
+    font_size: 40
+    size_hint_y: None
+    height: self.texture_size[1]
+
 <ScreenManager>:
 <CalendarScreen>:
     name: ''
     MDBoxLayout:
         orientation: 'vertical'
         md_bg_color: app.theme_cls.bg_normal
+
         MDBoxLayout:
             id: header_layout
             size_hint_y: .1
@@ -24,6 +32,7 @@
                 id: right_btn
                 icon: "chevron-right"
                 on_release: root.next_month()
+
         MDBoxLayout:
             id: day_labels
             size_hint_y: .05
@@ -42,19 +51,41 @@
                 text: "FRI"
             Label:
                 text: "SAT"
+
         GridLayout:
             id: day_grid
             size_hint_y: 1
             cols: 7
+
         BoxLayout:
             id: lower_layout
             orientation: 'vertical'
             size_hint_y: .75
+
+            MDLabel:
+                id: ll_title
+                size_hint_y: .2
+                halign: "center"
+                valign: "top"
+                font_size: "35sp"
+                theme_text_color: "Custom"
+                text_color: app.theme_cls.primary_light
+
+            MDScrollView:
+                id: ll_scroll_view
+                effect_cls: 'ScrollEffect'
+                MDGridLayout:
+                    id: scroll_grid
+                    cols: 1
+                    size_hint_y: None
+                    height: self.minimum_height
+
     MDFloatingActionButton:
         id: update_fab
         icon: 'plus'
         type: 'small'
         pos_hint: {"center_x": 0.92, "center_y": 0.04}
+        on_release: root.get_selected()
 
 <DayPopupLayout>:
     orientation: 'vertical'
@@ -65,3 +96,20 @@
     Button:
         id: dismiss
         text: "Return"
+<DayTile>:
+    orientation: 'vertical'
+    MDRectangleFlatButton:
+        id: day_tile
+        pos: root.pos
+        size: root.size
+        text_size: None, root.height * .6
+        valign: 'top'
+        font_size: 25
+    GridLayout:
+        id: event_grid
+        pos: root.pos
+        size: root.width, root.height * .4
+        cols: 4
+        col_default_width: root.width / 4
+        row_default_height: root.height *.4 / 3
+        padding: 3
