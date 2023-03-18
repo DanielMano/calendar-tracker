@@ -135,6 +135,29 @@ def get_events_by_day(conn, day):
     cursor.execute(sql, (day,))
     return cursor.fetchall()
 
+def get_event_names_by_day(conn, day):
+    sql = """
+        SELECT events.name
+        FROM dates, events
+        WHERE dates.event_id = events.event_id
+        AND dates.day=?
+        """
+    cursor = conn.cursor()
+    cursor.execute(sql, (day,))
+    return cursor.fetchall()
+
+def get_colors_by_day(conn, day):
+    sql = """
+        SELECT colors.hexcode
+        FROM dates, events, colors
+        WHERE dates.event_id = events.event_id
+        AND events.color_id = colors.color_id
+        AND dates.day=? 
+        """
+    cursor = conn.cursor()
+    cursor.execute(sql, (day,))
+    return cursor.fetchall()
+
 # Get all colors
 # Returns list of (ids, hexcodes)
 def get_colors(conn):

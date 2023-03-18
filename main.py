@@ -14,10 +14,13 @@ from kivy.properties import ListProperty
 from kivymd.app import MDApp
 from kivymd.uix.boxlayout import MDBoxLayout
 from kivymd.uix.button import MDIconButton
+from kivymd.uix.label import MDLabel
 
 import calendar_data
 import database
 import update_events_dialog as update_dialog
+
+import matplotlib.colors as mcols
 
 class ScreenManager(ScreenManager):
     def init_data(self):
@@ -90,6 +93,7 @@ class ScreenManager(ScreenManager):
                         scr.selected_day = child
                         child.ids.day_tile.line_color = cal_app.theme_cls.primary_light
 
+            scr.update_lower_layout()
             cal_app.sm.add_widget(scr)
             
         # Switch to new screen
@@ -97,8 +101,8 @@ class ScreenManager(ScreenManager):
     
     def add_day(self, day, screen):
         btn = DayTile()
-        btn.ids.day_tile.bind(on_press=screen.day_press)
-        #btn.ids.day_tile.bind(on_press=lambda instance: screen.day_press_test(instance, f"{self.active_year}-{self.active_month}-{day}"))
+        #btn.ids.day_tile.bind(on_press=screen.day_press)
+        btn.ids.day_tile.bind(on_press=lambda instance: screen.day_press(instance, f"{self.active_year}-{self.active_month}-{day}"))
         btn.day_string = f"{self.active_year}-{self.active_month}-{day}"
         if (
             day == self.today[2] 
@@ -114,12 +118,66 @@ class ScreenManager(ScreenManager):
             btn.ids.day_tile.line_color = [0, 0, 0, 0]
             btn.ids.day_tile.text = str(day)
             btn.ids.day_tile.text_color = cal_app.theme_cls.primary_dark
-        
-        # TODO: get data from database and 1. replace day_press popup with dialog and 2. add event icons for events
-
-        #btn.ids.event_grid.add_widget(self.add_event_icon([0.5, 0, 0.5, 1]))
+            
+        btn.update_icons()
 
         return btn
+
+class CalendarScreen(Screen):
+    selected_day = None
+    dialog_dict = {}
+    def prev_month(self):
+        cal_app.sm.prev_month()
+        
+    def next_month(self):
+        cal_app.sm.next_month()
+    
+    def my_callback(self, instance):
+        self.update_lower_layout()
+        self.selected_day.update_icons()
+    
+    def get_selected(self):
+        #print("screen:", self, "selected_day:", self.selected_day, "-->", self.selected_day.ids.day_tile.text, "-->", self.selected_day.day_string)
+        if not self.dialog_dict.get(self.selected_day.day_string):
+            self.dialog_dict[self.selected_day.day_string] = update_dialog.create_update_events_dialog(self, conn, self.selected_day.day_string)
+        selected_dialog = self.dialog_dict.get(self.selected_day.day_string)
+        selected_dialog.bind(on_dismiss=self.my_callback)
+        
+        selected_dialog.open()
+    
+    def day_press(self, instance, day_string):
+        #print("self:", self, "instance:", instance, "instance.parent:", instance.parent, "day_string:", day_string)
+        self.ids.scroll_grid.clear_widgets()
+        self.selected_day.ids.day_tile.line_color = [0, 0, 0, 0]
+        instance.line_color = cal_app.theme_cls.primary_light
+        self.selected_day = instance.parent
+        
+        self.update_lower_layout()
+           
+    def update_lower_layout(self):
+        self.ids.scroll_grid.clear_widgets()
+        y, m, d = self.selected_day.day_string.split('-')
+        self.ids.ll_title.text = f"{cal_app.sm.month_names[int(m)]} {d}, {y}"
+        event_names = database.get_event_names_by_day(conn, self.selected_day.day_string)
+        for (name,) in event_names:
+            lllabel = LowerLayoutLabel(text=name)
+            lllabel.font_size = "32sp"
+            self.ids.scroll_grid.add_widget(lllabel)
+        
+
+class DayPopupLayout(MDBoxLayout):
+    pass
+
+class DayTile(Widget):
+    day_string = None
+    
+    def update_icons(self):
+        self.ids.event_grid.clear_widgets()
+        # Search db for events on this day, if exist return its hexcode
+        colors = database.get_colors_by_day(conn, self.day_string)
+        for (color,) in colors:
+            hexcode = mcols.to_rgba(f"#{color}")
+            self.ids.event_grid.add_widget(self.add_event_icon(hexcode))
     
     def add_event_icon(self, color):
         event_icon = MDIconButton(
@@ -131,36 +189,8 @@ class ScreenManager(ScreenManager):
                 disabled = 'True',
                 )
         return event_icon
-        
 
-class CalendarScreen(Screen):
-    selected_day = None
-    dialog_dict = {}
-    def prev_month(self):
-        cal_app.sm.prev_month()
-        
-    def next_month(self):
-        cal_app.sm.next_month()
-    
-    def get_selected(self):
-        # TODO: use this to open dialog from update_events_dialog
-        print("screen:", self, "selected_day:", self.selected_day, "-->", self.selected_day.ids.day_tile.text, "-->", self.selected_day.day_string)
-        if not self.dialog_dict.get(self.selected_day.day_string):
-            self.dialog_dict[self.selected_day.day_string] = update_dialog.create_update_events_dialog(self, conn, self.selected_day.day_string)
-        self.dialog_dict.get(self.selected_day.day_string).open()
-    
-    def day_press(self, instance):
-        #print("self:", self, "instance:", instance, "day_string:", day_string)
-        self.selected_day.ids.day_tile.line_color = [0, 0, 0, 0]
-        instance.line_color = cal_app.theme_cls.primary_light
-        self.selected_day = instance.parent
-        # TODO: update lower layout to display currently selected events
-
-class DayPopupLayout(MDBoxLayout):
-    pass
-
-class DayTile(Widget):
-    day_string = None
+class LowerLayoutLabel(MDLabel):
     pass
 
 class CalendarTrackerApp(MDApp):

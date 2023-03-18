@@ -116,7 +116,8 @@ class UpdateEventDialogContent(MDBoxLayout):
         self.conn = conn
         self.day_string = day_string
         
-        self.event_ids_in_day = db.get_event_ids_by_day(conn, self.day_string)
+        self.event_ids_in_day = [row[0] for row in db.get_event_ids_by_day(
+            conn, self.day_string)]
         
         for key in all_events_dict:
             e_name = all_events_dict[key][0]
@@ -126,7 +127,7 @@ class UpdateEventDialogContent(MDBoxLayout):
             event.ids.display_icon.text_color = e_color
             # If event is already in db set checkbox to active and add event
             # name to events_in_db list
-            if (key,) in self.event_ids_in_day:
+            if key in self.event_ids_in_day:
                 self.events_in_db.append(all_events_dict.get(key)[0])
                 event.ids.checkbox.active = True
             
@@ -145,20 +146,22 @@ class UpdateEventDialogContent(MDBoxLayout):
         
     def confirm_event_changes(self):
         """Updates db by adding new events and deleting deselected ones
-        """
+        """        
         ids_to_confirm = []
         # Add new event to db if selected event not already in
         for name in self.events_to_confirm:
             e_id = self.get_id_from_name(name)
             ids_to_confirm.append(e_id)
-            if (e_id,) not in self.event_ids_in_day:
+            if e_id not in self.event_ids_in_day:
                 db.create_date(self.conn, (self.day_string, e_id))
+                self.event_ids_in_day.append(e_id)
         # Delete unchecked events from db
-        for (ids,) in self.event_ids_in_day:
+        for ids in list(self.event_ids_in_day):
             if ids not in ids_to_confirm:
                 db.delete_event_from_day_by_event_id(
-                    self.conn, self.day_string, ids
-                )
+                    self.conn, self.day_string, ids)
+                self.event_ids_in_day.remove(ids)
+
         # update list of current events in db
         self.events_in_db = self.events_to_confirm.copy()
     
