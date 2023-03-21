@@ -62,6 +62,7 @@ class CalendarScreen(Screen):
         for (name,) in event_names:
             lllabel = LowerLayoutLabel(text=name)
             lllabel.font_size = "32sp"
+            lllabel.font_name = 'fonts/nasalization-free.rg-regular.otf'
             self.ids.scroll_grid.add_widget(lllabel)
 
 class ScreenManager(ScreenManager):
@@ -76,9 +77,19 @@ class ScreenManager(ScreenManager):
         cal_app.sm.active_month -= 1
         cal_app.sm.transition.direction = 'right'
         self.create_month_screen()
+        
+    def prev_year(self):
+        cal_app.sm.active_year -= 1
+        cal_app.sm.transition.direction = 'right'
+        self.create_month_screen()
     
     def next_month(self):
         cal_app.sm.active_month += 1
+        cal_app.sm.transition.direction = 'left'
+        self.create_month_screen()
+        
+    def next_year(self):
+        cal_app.sm.active_year += 1
         cal_app.sm.transition.direction = 'left'
         self.create_month_screen()
     
