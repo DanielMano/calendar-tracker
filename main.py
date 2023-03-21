@@ -21,6 +21,48 @@ import database
 import update_events_dialog as update_dialog
 
 import matplotlib.colors as mcols
+from multipledispatch import dispatch
+
+class CalendarScreen(Screen):
+    selected_day = None
+    dialog_dict = {}
+    def prev_month(self):
+        cal_app.sm.prev_month()
+        
+    def next_month(self):
+        cal_app.sm.next_month()
+    
+    def my_callback(self, instance):
+        self.update_lower_layout()
+        self.selected_day.update_icons()
+    
+    def get_selected(self):
+        #print("screen:", self, "selected_day:", self.selected_day, "-->", self.selected_day.ids.day_tile.text, "-->", self.selected_day.day_string)
+        if not self.dialog_dict.get(self.selected_day.day_string):
+            self.dialog_dict[self.selected_day.day_string] = update_dialog.create_update_events_dialog(self, conn, self.selected_day.day_string)
+        selected_dialog = self.dialog_dict.get(self.selected_day.day_string)
+        selected_dialog.bind(on_dismiss=self.my_callback)
+        
+        selected_dialog.open()
+    
+    def day_press(self, instance, day_string):
+        #print("self:", self, "instance:", instance, "instance.parent:", instance.parent, "day_string:", day_string)
+        self.ids.scroll_grid.clear_widgets()
+        self.selected_day.ids.day_tile.line_color = [0, 0, 0, 0]
+        instance.line_color = cal_app.theme_cls.primary_light
+        self.selected_day = instance.parent
+        
+        self.update_lower_layout()
+           
+    def update_lower_layout(self):
+        self.ids.scroll_grid.clear_widgets()
+        y, m, d = self.selected_day.day_string.split('-')
+        self.ids.ll_title.text = f"{cal_app.sm.month_names[int(m)]} {d}, {y}"
+        event_names = database.get_event_names_by_day(conn, self.selected_day.day_string)
+        for (name,) in event_names:
+            lllabel = LowerLayoutLabel(text=name)
+            lllabel.font_size = "32sp"
+            self.ids.scroll_grid.add_widget(lllabel)
 
 class ScreenManager(ScreenManager):
     def init_data(self):
@@ -78,20 +120,38 @@ class ScreenManager(ScreenManager):
             scr.ids.header_label.text = scr.name
             
             # Get list of lists where each list is a week starting at sunday
-            month = calendar_data.get_days_of_month_of_year(self.active_year, self.active_month)
-            
-            for week in month:
+            # isolate first week and last week to replace 0 with correct day
+            # from either previous or next month
+            f_week, *m_weeks, l_week = calendar_data.get_days_of_month_of_year(self.active_year, self.active_month)
+            p_month, n_month = calendar_data.get_adj_months(self.active_year, self.active_month)
+            # For 1st week if day = 0, replace it with correct day from previous month
+            for day, pm_day in zip(f_week, calendar_data.get_last_week(*p_month)):
+                if day == 0:
+                    btn = self.add_day(pm_day, scr, p_month)
+                else:
+                    btn = self.add_day(day, scr)
+                scr.ids.day_grid.add_widget(btn)
+            # These days will never be 0, so create as normal
+            for week in m_weeks:
                 for day in week:                    
                     btn = self.add_day(day, scr)
                     scr.ids.day_grid.add_widget(btn)
+            # For last week, if day is 0, replace with correct day from next month
+            for day, nm_day in zip(l_week, calendar_data.get_first_week(*n_month)):
+                if day == 0:
+                    btn = self.add_day(nm_day, scr, n_month)
+                else:
+                    btn = self.add_day(day, scr)
+                scr.ids.day_grid.add_widget(btn)
             
             # If today's date isn't in this screen's month, select the first of
             # the month and outline it
             if scr.selected_day == None:
-                for child in scr.ids.day_grid.children:
+                for child in reversed(scr.ids.day_grid.children):
                     if child.ids.day_tile.text == '1':
                         scr.selected_day = child
                         child.ids.day_tile.line_color = cal_app.theme_cls.primary_light
+                        break
 
             scr.update_lower_layout()
             cal_app.sm.add_widget(scr)
@@ -99,6 +159,7 @@ class ScreenManager(ScreenManager):
         # Switch to new screen
         cal_app.sm.current = active_name
     
+    @dispatch(int, CalendarScreen)
     def add_day(self, day, screen):
         btn = DayTile()
         #btn.ids.day_tile.bind(on_press=screen.day_press)
@@ -111,59 +172,28 @@ class ScreenManager(ScreenManager):
         ):
             # If its today, select day, set text to orange, and underline text
             btn.ids.day_tile.text = f"[u]{day}[/u]"
-            btn.ids.day_tile.text_color = "orange"
+            btn.ids.day_tile.text_color = cal_app.theme_cls.accent_color
             screen.selected_day = btn
             btn.ids.day_tile.line_color = cal_app.theme_cls.primary_light
         else:
             btn.ids.day_tile.line_color = [0, 0, 0, 0]
             btn.ids.day_tile.text = str(day)
-            btn.ids.day_tile.text_color = cal_app.theme_cls.primary_dark
+            btn.ids.day_tile.text_color = cal_app.theme_cls.primary_color
             
         btn.update_icons()
 
         return btn
-
-class CalendarScreen(Screen):
-    selected_day = None
-    dialog_dict = {}
-    def prev_month(self):
-        cal_app.sm.prev_month()
-        
-    def next_month(self):
-        cal_app.sm.next_month()
     
-    def my_callback(self, instance):
-        self.update_lower_layout()
-        self.selected_day.update_icons()
-    
-    def get_selected(self):
-        #print("screen:", self, "selected_day:", self.selected_day, "-->", self.selected_day.ids.day_tile.text, "-->", self.selected_day.day_string)
-        if not self.dialog_dict.get(self.selected_day.day_string):
-            self.dialog_dict[self.selected_day.day_string] = update_dialog.create_update_events_dialog(self, conn, self.selected_day.day_string)
-        selected_dialog = self.dialog_dict.get(self.selected_day.day_string)
-        selected_dialog.bind(on_dismiss=self.my_callback)
-        
-        selected_dialog.open()
-    
-    def day_press(self, instance, day_string):
-        #print("self:", self, "instance:", instance, "instance.parent:", instance.parent, "day_string:", day_string)
-        self.ids.scroll_grid.clear_widgets()
-        self.selected_day.ids.day_tile.line_color = [0, 0, 0, 0]
-        instance.line_color = cal_app.theme_cls.primary_light
-        self.selected_day = instance.parent
-        
-        self.update_lower_layout()
-           
-    def update_lower_layout(self):
-        self.ids.scroll_grid.clear_widgets()
-        y, m, d = self.selected_day.day_string.split('-')
-        self.ids.ll_title.text = f"{cal_app.sm.month_names[int(m)]} {d}, {y}"
-        event_names = database.get_event_names_by_day(conn, self.selected_day.day_string)
-        for (name,) in event_names:
-            lllabel = LowerLayoutLabel(text=name)
-            lllabel.font_size = "32sp"
-            self.ids.scroll_grid.add_widget(lllabel)
-        
+    @dispatch(int, CalendarScreen, tuple)
+    def add_day(self, day, screen, other_month):
+        btn = DayTile()
+        year, month = other_month
+        btn.ids.day_tile.bind(on_press=lambda instance: screen.day_press(instance, f"{year}-{month}-{day}"))
+        btn.day_string = f"{year}-{month}-{day}"
+        btn.ids.day_tile.line_color = [0, 0, 0, 0]
+        btn.ids.day_tile.text = str(day)
+        btn.ids.day_tile.text_color = "gray"
+        return btn
 
 class DayPopupLayout(MDBoxLayout):
     pass
