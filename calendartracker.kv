@@ -7,7 +7,6 @@
 <LowerLayoutLabel>:
     text: "WHY?"
     halign: 'center'
-    font_size: 40
     size_hint_y: None
     height: self.texture_size[1]
 
@@ -22,16 +21,23 @@
             id: header_layout
             size_hint_y: .1
             HeaderIconButton:
+                icon: "chevron-double-left"
+                on_release: app.sm.prev_year()
+            HeaderIconButton:
                 id: left_btn
                 icon: "chevron-left"
                 on_release: root.prev_month()
             Label:
                 id: header_label
                 text: ''
+                font_name: 'fonts/venus rising rg.otf'
             HeaderIconButton:
                 id: right_btn
                 icon: "chevron-right"
                 on_release: root.next_month()
+            HeaderIconButton:
+                icon: "chevron-double-right"
+                on_release: app.sm.next_year()
 
         MDBoxLayout:
             id: day_labels
@@ -39,18 +45,25 @@
             orientation: 'horizontal'
             Label:
                 text: "SUN"
+                font_name: 'fonts/venus rising rg.otf'
             Label:
                 text: "MON"
+                font_name: 'fonts/venus rising rg.otf'
             Label:
                 text: "TUE"
+                font_name: 'fonts/venus rising rg.otf'
             Label:
                 text: "WED"
+                font_name: 'fonts/venus rising rg.otf'
             Label:
                 text: "THU"
+                font_name: 'fonts/venus rising rg.otf'
             Label:
                 text: "FRI"
+                font_name: 'fonts/venus rising rg.otf'
             Label:
                 text: "SAT"
+                font_name: 'fonts/venus rising rg.otf'
 
         GridLayout:
             id: day_grid
@@ -67,7 +80,8 @@
                 size_hint_y: .2
                 halign: "center"
                 valign: "top"
-                font_size: "35sp"
+                font_size: "30sp"
+                font_name: 'fonts/venus rising rg.otf'
                 theme_text_color: "Custom"
                 text_color: app.theme_cls.primary_light
 
