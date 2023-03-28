@@ -10,7 +10,7 @@ package.domain = org.cal_tracker
 source.dir = .
 source.exclude_dirs = .vs, __pycache__, build
 source.include_exts = 
-source.exclude_exts = spec,html,htm,gitattributes,gitignore
+source.exclude_exts = spec,html,htm,gitattributes,gitignore,db
 #source.include_patterns = assets/*,images/*.png
 #source.exclude_patterns = license,images/*/*.jpg
 
