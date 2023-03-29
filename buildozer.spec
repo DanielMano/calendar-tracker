@@ -16,7 +16,7 @@ source.exclude_exts = spec,html,htm,gitattributes,gitignore,db
 
 icon.filename = calendar_icon.png
 presplash.filename = calendar_icon.png
-requirements = python3,kivy,matplotlib,multipledispatch,sqlite3
+requirements = python3,kivy,matplotlib,multipledispatch,sqlite3,kivymd
 
 
 # OSX Specific
