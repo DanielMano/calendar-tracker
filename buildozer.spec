@@ -3,7 +3,7 @@
 #GENERAL
 
 title = Calendar Tracker
-version = 0.1
+version = 0.2.0
 package.name = cal_tracker
 package.domain = org.cal_tracker
 
@@ -18,6 +18,7 @@ icon.filename = calendar_icon.png
 presplash.filename = calendar_icon.png
 requirements = python3,kivy==2.1.0,kivymd==1.0.2,matplotlib,multipledispatch,sqlite3,pillow
 
+orientation = portrait
 
 # OSX Specific
 
@@ -26,7 +27,7 @@ osx.python_version = 3
 
 # Android specific
 
-fullscreen = 1
+fullscreen = 0
 android.presplash_color = #000000
 android.permissions = INTERNET, STORAGE
 android.archs = arm64-v8a, armeabi-v7a
