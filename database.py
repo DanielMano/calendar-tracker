@@ -1,19 +1,21 @@
 import sqlite3
 from sqlite3 import Error
 
-import matplotlib.pyplot as plt
 
 """ create a database connection specified by db_file
     returns Connection object or None
 """
+
+
 def create_connection(db_file):
     conn = None
     try:
         conn = sqlite3.connect(db_file)
     except Error as e:
         print(e)
-        
+
     return conn
+
 
 # Creates the colors table
 def create_colors_table(conn):
@@ -27,6 +29,7 @@ def create_colors_table(conn):
         cursor.execute(sql)
     except Error as e:
         print(e)
+
 
 # Creates the events table
 def create_events_table(conn):
@@ -43,6 +46,7 @@ def create_events_table(conn):
     except Error as e:
         print(e)
 
+
 # Creates the dates table
 def create_dates_table(conn):
     sql = """
@@ -57,7 +61,8 @@ def create_dates_table(conn):
         cursor.execute(sql)
     except Error as e:
         print(e)
-        
+
+
 # Add a color hexcode to the colors table
 # Returns the color_id
 def create_color(conn, hexcode):
@@ -74,6 +79,7 @@ def create_color(conn, hexcode):
         if cursor:
             return cursor.lastrowid
 
+
 # Add an event to the events table
 # Returns the event_id
 def create_event(conn, event):
@@ -89,11 +95,12 @@ def create_event(conn, event):
     finally:
         if cursor:
             return cursor.lastrowid
-        
+
+
 # Add a date to the dates table
 # Returns the date_id
 def create_date(conn, date):
-    #TODO create a method to add dates in batches, prevents creation and deletion of multiple cursors
+    # TODO create a method to add dates in batches, prevents creation and deletion of multiple cursors
     sql = """
         INSERT INTO dates(day, event_id) VALUES(?,?)
         """
@@ -107,6 +114,7 @@ def create_date(conn, date):
         if cursor:
             return cursor.lastrowid
 
+
 # Delete a row from dates
 def delete_event_from_day(conn, date_id):
     sql = "DELETE FROM dates WHERE date_id=?"
@@ -114,12 +122,14 @@ def delete_event_from_day(conn, date_id):
     cursor.execute(sql, (date_id,))
     conn.commit()
 
+
 # Delete a row from events
 def delete_event_from_events(conn, event_id):
     sql = "DELETE FROM events WHERE event_id=?"
     cursor = conn.cursor()
     cursor.execute(sql, (event_id,))
     conn.commit()
+
 
 # Get all events for a specific day
 # Returns list of (day, event, hexcode) for given date
@@ -135,6 +145,7 @@ def get_events_by_day(conn, day):
     cursor.execute(sql, (day,))
     return cursor.fetchall()
 
+
 def get_event_names_by_day(conn, day):
     sql = """
         SELECT events.name
@@ -145,6 +156,7 @@ def get_event_names_by_day(conn, day):
     cursor = conn.cursor()
     cursor.execute(sql, (day,))
     return cursor.fetchall()
+
 
 def get_colors_by_day(conn, day):
     sql = """
@@ -157,6 +169,7 @@ def get_colors_by_day(conn, day):
     cursor = conn.cursor()
     cursor.execute(sql, (day,))
     return cursor.fetchall()
+
 
 # Get all colors
 # Returns list of (ids, hexcodes)
@@ -173,7 +186,8 @@ def get_colors(conn):
     cursor = conn.cursor()
     cursor.execute(sql)
     return cursor.fetchall()
-    
+
+
 def get_events(conn):
     """Returns list of (event_id, name, hexcode)
 
@@ -194,6 +208,7 @@ def get_events(conn):
     cursor.execute(sql)
     return cursor.fetchall()
 
+
 def get_event_ids_by_day(conn, day_string):
     """Return list of event_ids -> int
 
@@ -212,6 +227,7 @@ def get_event_ids_by_day(conn, day_string):
     cursor.execute(sql, (day_string,))
     return cursor.fetchall()
 
+
 def delete_event_from_day_by_event_id(conn, day_string, e_id):
     """Deletes from dates table an event by event_id for given day
 
@@ -224,5 +240,11 @@ def delete_event_from_day_by_event_id(conn, day_string, e_id):
         DELETE FROM dates WHERE day=? and event_id=?
         """
     cursor = conn.cursor()
-    cursor.execute(sql, (day_string, e_id,))
+    cursor.execute(
+        sql,
+        (
+            day_string,
+            e_id,
+        ),
+    )
     conn.commit()

@@ -3,15 +3,18 @@ import datetime
 
 calendar.setfirstweekday(calendar.SUNDAY)
 
+
 def get_today_date_string():
     today = datetime.date.today()
     return [today.year, today.month, today.day]
 
+
 def get_month_names():
     return calendar.month_name
 
+
 def get_days_of_month_of_year(year, month):
-    """Return a matrix representing a month's calendar. 
+    """Return a matrix representing a month's calendar.
     Each row represents a week; days outside this month are zero.
 
     Args:
@@ -22,6 +25,7 @@ def get_days_of_month_of_year(year, month):
         list: list of lists
     """
     return calendar.monthcalendar(year, month)
+
 
 def get_first_week(year, month):
     """Get list of the week which includes the first of the supplied month where
@@ -37,6 +41,7 @@ def get_first_week(year, month):
     """
     return calendar.monthcalendar(year, month)[0]
 
+
 def get_last_week(year, month):
     """Return list of the week which includes the last day of the supplied month
     where days outside the month are 0.
@@ -50,6 +55,7 @@ def get_last_week(year, month):
     """
     return calendar.monthcalendar(year, month).pop()
 
+
 def get_adj_months(year, month):
     """Return list containing (previous month and year) and (next month and year)
 
@@ -58,7 +64,7 @@ def get_adj_months(year, month):
         month (int): current month
 
     Returns:
-        list: [(year of previous month, previous month), 
+        list: [(year of previous month, previous month),
         (year of next month, next month)]
     """
     prev_y = year
