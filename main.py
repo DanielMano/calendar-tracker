@@ -23,6 +23,8 @@ import update_events_dialog as update_dialog
 
 from multipledispatch import dispatch
 
+__version__ = "0.3.0"
+
 
 class CalendarScreen(Screen):
     selected_day = None
