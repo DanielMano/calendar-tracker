@@ -16,6 +16,7 @@ from kivymd.app import MDApp
 from kivymd.uix.boxlayout import MDBoxLayout
 from kivymd.uix.button import MDIconButton
 from kivymd.uix.label import MDLabel
+from kivymd.toast import toast
 
 import calendar_data
 import database
@@ -23,7 +24,36 @@ import update_events_dialog as update_dialog
 
 from multipledispatch import dispatch
 
-__version__ = "0.3.0"
+from os import path, rename
+
+import android_storage
+
+__version__ = "0.3.23.1"
+
+
+class DatabasePrompt(Screen):
+    def existing_callback(self):
+        print("you chose to pick an existing db")
+        print(cal_app.sm.screen_names)
+
+        # 1.    initiate chooser to pick file and return file path
+        # 2.    rename file to "database_version#.db"
+        # conn = database.create_connection("database_version#.db")
+        if chooser.chooser_start():
+            # new_db_version = "database_" + __version__ + ".db"
+            # rename(chooser.path, new_db_version)
+            print("db copied")
+            toast("db file copied")
+            # TODO change conn connection to copied file
+
+        cal_app.sm.create_month_screen()
+        cal_app.sm.remove_widget(self)
+
+    def default_callback(self):
+        print("you chose to use the default db")
+        print(cal_app.sm.screens)
+        cal_app.sm.create_month_screen()
+        cal_app.sm.remove_widget(self)
 
 
 class CalendarScreen(Screen):
@@ -273,13 +303,22 @@ class CalendarTrackerApp(MDApp):
         self.sm = ScreenManager()
         self.sm.init_data()
         # Create and display current month screen on startup
-        self.sm.create_month_screen()
+
+        # self.sm.create_month_screen()
+        current_db_version = "database_" + __version__ + ".db"
+        if path.exists(current_db_version):
+            print(current_db_version, "exists, proceed as normal")
+            self.sm.create_month_screen()
+        else:
+            print(current_db_version, "doesn't exist, trigger prompt")
+            self.sm.add_widget(DatabasePrompt(name="prompt"))
 
         return self.sm
 
 
 if __name__ == "__main__":
     conn = database.create_connection("database.db")
+    chooser = android_storage.Storage()
 
     cal_app = CalendarTrackerApp()
     cal_app.run()

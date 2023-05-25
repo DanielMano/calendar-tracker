@@ -11,6 +11,21 @@
     height: self.texture_size[1]
 
 <ScreenManager>:
+<DatabasePrompt>:
+    BoxLayout:
+        orientation: 'vertical'
+        Label:
+            text: "Would you like to use an existing db or use the default one?"
+        Label:
+            text: "You should only see this screen once."
+        BoxLayout:
+            orientation: 'horizontal'
+            Button:
+                text: "Existing"
+                on_press: root.existing_callback()
+            Button:
+                text: "Default"
+                on_press: root.default_callback()
 <CalendarScreen>:
     name: ''
     MDBoxLayout:
