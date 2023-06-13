@@ -1,3 +1,4 @@
+#: import picker date_picker_popup
 <HeaderIconButton@MDIconButton>:
     icon_size: "26sp"
     theme_icon_color: "Custom"
@@ -27,10 +28,12 @@
                 id: left_btn
                 icon: "chevron-left"
                 on_release: root.prev_month()
-            Label:
-                id: header_label
-                text: ''
-                font_name: 'fonts/venus rising rg.otf'
+            AnchorLayout:
+                MDFlatButton:
+                    id: header_label
+                    text: ''
+                    font_name: 'fonts/venus rising rg.otf'
+                    on_release: root.open_date_picker_popup()
             HeaderIconButton:
                 id: right_btn
                 icon: "chevron-right"
@@ -127,3 +130,85 @@
         col_default_width: root.width / 4
         row_default_height: root.height *.4 / 3
         padding: 3
+
+
+<PopupContent>:
+    GridLayout:
+        orientation: 'lr-tb'
+        cols: 1
+        size_hint: 0.9, 0.95
+        pos_hint: {"x":0.05, "top":1}
+        BoxLayout:
+            orientation: "horizontal"
+            size_hint: 1, 0.1
+            Button:
+                text: "<"
+                on_press: root.displayed_year -= 1
+            Label:
+                text: str(root.displayed_year)
+            Button:
+                text: ">"
+                on_press: root.displayed_year += 1
+        GridLayout:
+            orientation: "lr-tb"
+            cols: 4
+            Button:
+                text: 'Jan'
+                on_press:
+                    root.displayed_month = 1
+                    root.popup_dismiss_callback()
+            Button:
+                text: 'Feb'
+                on_press:
+                    root.displayed_month = 2
+                    root.popup_dismiss_callback()
+            Button:
+                text: 'Mar'
+                on_press:
+                    root.displayed_month = 3
+                    root.popup_dismiss_callback()
+            Button:
+                text: 'Apr'
+                on_press:
+                    root.displayed_month = 4
+                    root.popup_dismiss_callback()
+            Button:
+                text: 'May'
+                on_press:
+                    root.displayed_month = 5
+                    root.popup_dismiss_callback()
+            Button:
+                text: 'Jun'
+                on_press:
+                    root.displayed_month = 6
+                    root.popup_dismiss_callback()
+            Button:
+                text: 'Jul'
+                on_press:
+                    root.displayed_month = 7
+                    root.popup_dismiss_callback()
+            Button:
+                text: 'Aug'
+                on_press:
+                    root.displayed_month = 8
+                    root.popup_dismiss_callback()
+            Button:
+                text: 'Sep'
+                on_press:
+                    root.displayed_month = 9
+                    root.popup_dismiss_callback()
+            Button:
+                text: 'Oct'
+                on_press:
+                    root.displayed_month = 10
+                    root.popup_dismiss_callback()
+            Button:
+                text: 'Nov'
+                on_press:
+                    root.displayed_month = 11
+                    root.popup_dismiss_callback()
+            Button:
+                text: 'Dec'
+                on_press:
+                    root.displayed_month = 12
+                    root.popup_dismiss_callback()

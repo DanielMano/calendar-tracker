@@ -3,6 +3,10 @@ import datetime
 
 calendar.setfirstweekday(calendar.SUNDAY)
 
+month_name_to_num: dict = {
+    name: num for num, name in enumerate(calendar.month_name) if num
+}
+
 
 def get_today_date_string():
     today = datetime.date.today()
