@@ -20,6 +20,7 @@ from kivymd.uix.label import MDLabel
 import calendar_data
 import database
 import update_events_dialog as update_dialog
+import date_picker_popup as dpp
 
 from multipledispatch import dispatch
 
@@ -29,6 +30,28 @@ __version__ = "0.3.0"
 class CalendarScreen(Screen):
     selected_day = None
     dialog_dict = {}
+    custompopup: Popup = None
+
+    def open_date_picker_popup(self):
+        screen_year, screen_month = self.name.split("-")
+        if self.custompopup is None:
+            self.custompopup = dpp.create_date_picker_popup(
+                self,
+                int(screen_year),
+                calendar_data.month_name_to_num.get(screen_month),
+            )
+
+        self.custompopup.open()
+
+    def dismiss_date_picker_popup(self, new_month: int, new_year: int):
+        if new_year > cal_app.sm.active_year:
+            cal_app.sm.transition.direction = "left"
+        if new_year < cal_app.sm.active_year:
+            cal_app.sm.transition.direction = "right"
+        self.custompopup.dismiss()
+        cal_app.sm.active_month = new_month
+        cal_app.sm.active_year = new_year
+        cal_app.sm.create_month_screen()
 
     def prev_month(self):
         cal_app.sm.prev_month()
