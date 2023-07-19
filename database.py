@@ -158,6 +158,19 @@ def get_event_names_by_day(conn, day):
     return cursor.fetchall()
 
 
+def get_events_name_hexcode_by_day(conn, day):
+    sql = """
+        SELECT events.name, colors.hexcode
+        FROM dates, events, colors
+        WHERE dates.event_id = events.event_id
+        AND events.color_id = colors.color_id
+        AND dates.day=?
+        """
+    cursor = conn.cursor()
+    cursor.execute(sql, (day,))
+    return cursor.fetchall()
+
+
 def get_colors_by_day(conn, day):
     sql = """
         SELECT colors.hexcode
@@ -201,6 +214,26 @@ def get_events(conn):
     """
     sql = """
         SELECT events.event_id, events.name, colors.hexcode 
+        FROM events, colors
+        WHERE events.color_id = colors.color_id
+        """
+    cursor = conn.cursor()
+    cursor.execute(sql)
+    return cursor.fetchall()
+
+
+def get_events_name_hexcode(conn):
+    """Returns list of (name, hexcode)
+
+    Args:
+        conn (sqlite3.Connection): Connection to database
+
+    Returns:
+        list: Return all rows as a list where each row is a tuple of
+        (str: name, str: hexcode) where hexcode is missing the #
+    """
+    sql = """
+        SELECT events.name, colors.hexcode 
         FROM events, colors
         WHERE events.color_id = colors.color_id
         """

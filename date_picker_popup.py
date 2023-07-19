@@ -16,7 +16,6 @@ def create_date_picker_popup(self, year: int, month: int) -> Popup:
         size_hint=(None, None),
         size=(500, 500),
     )
-    popup.bind(on_open=open_callback)
     return popup
 
 

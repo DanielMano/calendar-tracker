@@ -13,6 +13,11 @@ def get_today_date_string():
     return [today.year, today.month, today.day]
 
 
+def get_today():
+    today = datetime.date.today()
+    return (today, today.year, today.month, today.day)
+
+
 def get_month_names():
     return calendar.month_name
 
