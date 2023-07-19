@@ -1,136 +1,142 @@
-#: import picker date_picker_popup
 <HeaderIconButton@MDIconButton>:
     icon_size: "26sp"
     theme_icon_color: "Custom"
     icon_color: "white"
     pos_hint: {"center_x": .5, "center_y": .5}
 
-<LowerLayoutLabel>:
-    text: "WHY?"
-    halign: 'center'
-    size_hint_y: None
-    height: self.texture_size[1]
+<RootManager>:
+    screen_manager: screen_manager
+    orientation: 'vertical'
+    md_bg_color: app.theme_cls.bg_normal
 
-<ScreenManager>:
-<CalendarScreen>:
-    name: ''
     MDBoxLayout:
-        orientation: 'vertical'
-        md_bg_color: app.theme_cls.bg_normal
+        md_bg_color: [1, 1, 0, 0.5]
+        id: header_layout
+        size_hint_y: .1
+        HeaderIconButton:
+            icon: "chevron-double-left"
+            on_release: root.prev_year()
+        HeaderIconButton:
+            id: left_btn
+            icon: "chevron-left"
+            on_release: root.prev_month()
+        AnchorLayout:
+            MDFlatButton:
+                id: header_label
+                text: root.header_date
+                #font_name: 'fonts/venus rising rg.otf'
+                on_release: root.open_picker_popup()
+        HeaderIconButton:
+            id: right_btn
+            icon: "chevron-right"
+            on_release: root.next_month()
+        HeaderIconButton:
+            icon: "chevron-double-right"
+            on_release: root.next_year()
 
-        MDBoxLayout:
-            id: header_layout
-            size_hint_y: .1
-            HeaderIconButton:
-                icon: "chevron-double-left"
-                on_release: app.sm.prev_year()
-            HeaderIconButton:
-                id: left_btn
-                icon: "chevron-left"
-                on_release: root.prev_month()
-            AnchorLayout:
-                MDFlatButton:
-                    id: header_label
-                    text: ''
-                    font_name: 'fonts/venus rising rg.otf'
-                    on_release: root.open_date_picker_popup()
-            HeaderIconButton:
-                id: right_btn
-                icon: "chevron-right"
-                on_release: root.next_month()
-            HeaderIconButton:
-                icon: "chevron-double-right"
-                on_release: app.sm.next_year()
+    MDBoxLayout:
+        md_bg_color: [1, 0, 0, 0.5]
+        id: day_labels
+        size_hint_y: .05
+        orientation: 'horizontal'
+        Label:
+            text: "SUN"
+            #font_name: 'fonts/venus rising rg.otf'
+        Label:
+            text: "MON"
+            #font_name: 'fonts/venus rising rg.otf'
+        Label:
+            text: "TUE"
+            #font_name: 'fonts/venus rising rg.otf'
+        Label:
+            text: "WED"
+            #font_name: 'fonts/venus rising rg.otf'
+        Label:
+            text: "THU"
+            #font_name: 'fonts/venus rising rg.otf'
+        Label:
+            text: "FRI"
+            #font_name: 'fonts/venus rising rg.otf'
+        Label:
+            text: "SAT"
+            #font_name: 'fonts/venus rising rg.otf'
 
-        MDBoxLayout:
-            id: day_labels
-            size_hint_y: .05
-            orientation: 'horizontal'
-            Label:
-                text: "SUN"
-                font_name: 'fonts/venus rising rg.otf'
-            Label:
-                text: "MON"
-                font_name: 'fonts/venus rising rg.otf'
-            Label:
-                text: "TUE"
-                font_name: 'fonts/venus rising rg.otf'
-            Label:
-                text: "WED"
-                font_name: 'fonts/venus rising rg.otf'
-            Label:
-                text: "THU"
-                font_name: 'fonts/venus rising rg.otf'
-            Label:
-                text: "FRI"
-                font_name: 'fonts/venus rising rg.otf'
-            Label:
-                text: "SAT"
-                font_name: 'fonts/venus rising rg.otf'
-
-        GridLayout:
-            id: day_grid
-            size_hint_y: 1
-            cols: 7
-
-        BoxLayout:
-            id: lower_layout
-            orientation: 'vertical'
-            size_hint_y: .75
-
-            MDLabel:
-                id: ll_title
-                size_hint_y: .2
-                halign: "center"
-                valign: "top"
-                font_size: "30sp"
-                font_name: 'fonts/venus rising rg.otf'
-                theme_text_color: "Custom"
-                text_color: app.theme_cls.primary_light
-
-            MDScrollView:
-                id: ll_scroll_view
-                effect_cls: 'ScrollEffect'
-                MDGridLayout:
-                    id: scroll_grid
-                    cols: 1
-                    size_hint_y: None
-                    height: self.minimum_height
-
-    MDFloatingActionButton:
-        id: update_fab
-        icon: 'plus'
-        type: 'small'
-        pos_hint: {"center_x": 0.92, "center_y": 0.04}
-        on_release: root.get_selected()
-
-<DayPopupLayout>:
-    orientation: 'vertical'
-    Label:
-        id: y_m
-    Label:
-        id: day
-    Button:
-        id: dismiss
-        text: "Return"
-<DayTile>:
-    orientation: 'vertical'
-    MDRectangleFlatButton:
-        id: day_tile
+    ScreenManager:
+        id: screen_manager
         pos: root.pos
         size: root.size
-        text_size: None, root.height * .6
-        valign: 'top'
-        font_size: 25
-    GridLayout:
-        id: event_grid
-        pos: root.pos
-        size: root.width, root.height * .4
-        cols: 4
-        col_default_width: root.width / 4
-        row_default_height: root.height *.4 / 3
-        padding: 3
 
+    MDBoxLayout: #make this the lower layout?
+        md_bg_color: [0, 1, 1, 0.5]
+        orientation: 'vertical'
+        size_hint_y: 1
+
+        MDLabel:
+            size_hint_y: .1
+            text: root.footer_title
+            halign: "center"
+            valign: "top"
+            font_size: "30sp"
+        MDGridLayout:
+            id: lower_grid
+            md_bg_color: [0.3, 0.2, 0.3, 1]
+            rows: 8
+            orientation: 'tb-lr'
+            row_force_default: True
+            row_default_height: self.height / 8
+
+    MDFloatLayout:
+        id: fab_cont
+        size_hint_y: .1
+        MDFloatingActionButton:
+            type: 'small'
+            pos_hint: {"right": 1 - (10/root.width), "y": (10/fab_cont.height)}
+            icon: 'plus'
+            on_release:
+                root.add_events_to_selected_day()
+
+
+<CalendarScreen>:
+    MDGridLayout:
+        id: grid
+        md_bg_color: [0.7, 0.2, 0.8, 0.5]
+        cols: 7
+        padding: 1
+        spacing: 2
+        #Button:
+        #    text: "test btn"
+        #    on_press:
+        #        print(root)
+        #        print(root.screen_manager)
+
+<DayTileEvent>:
+    #md_bg_color: [0.2, 0.7, 0.6, 1]
+    line_color: [0, 0, 0, 1]
+
+<DayTile>:
+    # md_bg_color: [1, 0.5, 0.9, 1]
+    Label:
+        text: root.day_num
+        color: root.text_color
+        underline: root.underline
+        size_hint: 1, 0.3
+        pos_hint: {'x': 0, 'top': 1}
+    MDGridLayout:
+        id: grid
+        md_bg_color: [0.2, 0.5, 0.9, 1]
+        size_hint: 1, 0.7
+        pos_hint: {'x': 0, 'y': 0}
+        cols: 4
+        row_force_default: True
+        row_default_height: self.height / 2
+        col_force_default: True
+        col_default_width: self.width / 4
+    MDRectangleFlatButton:
+        id: tile
+        pos: root.pos
+        size: root.size
+        line_color: root.line_color
+        line_width: 2
 
 <PopupContent>:
     GridLayout:
@@ -212,3 +218,23 @@
                 on_press:
                     root.displayed_month = 12
                     root.popup_dismiss_callback()
+
+<EventManagerPopupContent>:
+    orientation: 'vertical'
+    GridLayout:
+        id: manager_grid
+        cols: 2
+        padding: 10
+    BoxLayout:
+        id: manager_box
+        orientation: 'horizontal'
+        size_hint_y: .1
+        padding: 10
+        Button:
+            text: 'Cancel'
+            on_press:
+                root.cancel_dismiss()
+        Button:
+            text: 'Confirm'
+            on_press:
+                root.confirm_dismiss()

@@ -1,0 +1,215 @@
+#: import picker date_picker_popup
+<HeaderIconButton@MDIconButton>:
+    icon_size: "26sp"
+    theme_icon_color: "Custom"
+    icon_color: "white"
+    pos_hint: {"center_x": .5, "center_y": .5}
+
+<LowerLayoutLabel>:
+    text: "WHY?"
+    halign: 'center'
+    size_hint_y: None
+    height: self.texture_size[1]
+
+<ScreenManager>:
+<CalendarScreen>:
+    name: ''
+    MDBoxLayout:
+        orientation: 'vertical'
+        md_bg_color: app.theme_cls.bg_normal
+
+        MDBoxLayout:
+            id: header_layout
+            size_hint_y: .1
+            HeaderIconButton:
+                icon: "chevron-double-left"
+                on_release: app.sm.prev_year()
+            HeaderIconButton:
+                id: left_btn
+                icon: "chevron-left"
+                on_release: root.prev_month()
+            AnchorLayout:
+                MDFlatButton:
+                    id: header_label
+                    text: ''
+                    font_name: 'fonts/venus rising rg.otf'
+                    on_release: root.open_date_picker_popup()
+            HeaderIconButton:
+                id: right_btn
+                icon: "chevron-right"
+                on_release: root.next_month()
+            HeaderIconButton:
+                icon: "chevron-double-right"
+                on_release: app.sm.next_year()
+
+        MDBoxLayout:
+            id: day_labels
+            size_hint_y: .05
+            orientation: 'horizontal'
+            Label:
+                text: "SUN"
+                font_name: 'fonts/venus rising rg.otf'
+            Label:
+                text: "MON"
+                font_name: 'fonts/venus rising rg.otf'
+            Label:
+                text: "TUE"
+                font_name: 'fonts/venus rising rg.otf'
+            Label:
+                text: "WED"
+                font_name: 'fonts/venus rising rg.otf'
+            Label:
+                text: "THU"
+                font_name: 'fonts/venus rising rg.otf'
+            Label:
+                text: "FRI"
+                font_name: 'fonts/venus rising rg.otf'
+            Label:
+                text: "SAT"
+                font_name: 'fonts/venus rising rg.otf'
+
+        GridLayout:
+            id: day_grid
+            size_hint_y: 1
+            cols: 7
+
+        BoxLayout:
+            id: lower_layout
+            orientation: 'vertical'
+            size_hint_y: .75
+
+            MDLabel:
+                id: ll_title
+                size_hint_y: .2
+                halign: "center"
+                valign: "top"
+                font_size: "30sp"
+                font_name: 'fonts/venus rising rg.otf'
+                theme_text_color: "Custom"
+                text_color: app.theme_cls.primary_light
+
+            MDScrollView:
+                id: ll_scroll_view
+                effect_cls: 'ScrollEffect'
+                MDGridLayout:
+                    id: scroll_grid
+                    cols: 1
+                    size_hint_y: None
+                    height: self.minimum_height
+
+    MDFloatingActionButton:
+        id: update_fab
+        icon: 'plus'
+        type: 'small'
+        pos_hint: {"center_x": 0.92, "center_y": 0.04}
+        on_release: root.get_selected()
+
+<DayPopupLayout>:
+    orientation: 'vertical'
+    Label:
+        id: y_m
+    Label:
+        id: day
+    Button:
+        id: dismiss
+        text: "Return"
+<DayTile>:
+    orientation: 'vertical'
+    MDRectangleFlatButton:
+        id: day_tile
+        pos: root.pos
+        size: root.size
+        text_size: None, root.height * .6
+        valign: 'top'
+        font_size: 25
+    GridLayout:
+        id: event_grid
+        pos: root.pos
+        size: root.width, root.height * .4
+        cols: 4
+        col_default_width: root.width / 4
+        row_default_height: root.height *.4 / 3
+        padding: 3
+
+
+<PopupContent>:
+    GridLayout:
+        orientation: 'lr-tb'
+        cols: 1
+        size_hint: 0.9, 0.95
+        pos_hint: {"x":0.05, "top":1}
+        BoxLayout:
+            orientation: "horizontal"
+            size_hint: 1, 0.1
+            Button:
+                text: "<"
+                on_press: root.displayed_year -= 1
+            Label:
+                text: str(root.displayed_year)
+            Button:
+                text: ">"
+                on_press: root.displayed_year += 1
+        GridLayout:
+            orientation: "lr-tb"
+            cols: 4
+            Button:
+                text: 'Jan'
+                on_press:
+                    print("root:", root)
+                    root.displayed_month = 1
+                    root.popup_dismiss_callback()
+            Button:
+                text: 'Feb'
+                on_press:
+                    root.displayed_month = 2
+                    root.popup_dismiss_callback()
+            Button:
+                text: 'Mar'
+                on_press:
+                    root.displayed_month = 3
+                    root.popup_dismiss_callback()
+            Button:
+                text: 'Apr'
+                on_press:
+                    root.displayed_month = 4
+                    root.popup_dismiss_callback()
+            Button:
+                text: 'May'
+                on_press:
+                    root.displayed_month = 5
+                    root.popup_dismiss_callback()
+            Button:
+                text: 'Jun'
+                on_press:
+                    root.displayed_month = 6
+                    root.popup_dismiss_callback()
+            Button:
+                text: 'Jul'
+                on_press:
+                    root.displayed_month = 7
+                    root.popup_dismiss_callback()
+            Button:
+                text: 'Aug'
+                on_press:
+                    root.displayed_month = 8
+                    root.popup_dismiss_callback()
+            Button:
+                text: 'Sep'
+                on_press:
+                    root.displayed_month = 9
+                    root.popup_dismiss_callback()
+            Button:
+                text: 'Oct'
+                on_press:
+                    root.displayed_month = 10
+                    root.popup_dismiss_callback()
+            Button:
+                text: 'Nov'
+                on_press:
+                    root.displayed_month = 11
+                    root.popup_dismiss_callback()
+            Button:
+                text: 'Dec'
+                on_press:
+                    root.displayed_month = 12
+                    root.popup_dismiss_callback()
