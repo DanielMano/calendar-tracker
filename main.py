@@ -21,7 +21,6 @@ from kivy.uix.popup import Popup
 import calendar_data
 import database
 import date_picker_popup as dpp
-import update_events_dialog as update_dialog
 import day_event_manager_popup as manager_popup
 
 # from timeit import default_timer as timer
@@ -226,7 +225,7 @@ class RootManager(BoxLayout):
         for *_, hexcode in day_tile.events:
             if len(day_tile.ids.grid.children) < 7:
                 day_tile.ids.grid.add_widget(
-                    DayTileEvent(md_bg_color=update_dialog.hex_to_rgba(hexcode))
+                    DayTileEvent(md_bg_color=self.hex_to_rgba(hexcode))
                 )
             else:
                 more = DayTileEvent(line_color=[0, 0, 0, 0])
@@ -260,7 +259,7 @@ class RootManager(BoxLayout):
         for *_, hexcode in day_tile.events:
             if len(day_tile.ids.grid.children) < 7:
                 day_tile.ids.grid.add_widget(
-                    DayTileEvent(md_bg_color=update_dialog.hex_to_rgba(hexcode))
+                    DayTileEvent(md_bg_color=self.hex_to_rgba(hexcode))
                 )
             else:
                 more = DayTileEvent(line_color=[0, 0, 0, 0])
@@ -276,6 +275,25 @@ class RootManager(BoxLayout):
         )
         self.event_manager_popup.bind(on_dismiss=self.set_lower_layout)
         self.event_manager_popup.update_and_open(self.selected_day)
+
+    def hex_to_rgba(self, hexcode):
+        """Convert hexcode color to rgba tuple
+
+        Args:
+            hexcode (str): hexcode either with or without leading '#'
+
+        Returns:
+            rgba: tuple containing rgba values, a is always 1.0
+        """
+        hexcode = hexcode.lstrip("#")
+        lv = len(hexcode)
+        rgba = tuple(
+            j / 255
+            for j in tuple(
+                int(hexcode[i : i + lv // 3], 16) for i in range(0, lv, lv // 3)
+            )
+        ) + (1.0,)
+        return rgba
 
 
 class CalendarScreen(Screen):

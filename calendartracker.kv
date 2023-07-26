@@ -88,8 +88,14 @@
     MDFloatLayout:
         id: fab_cont
         size_hint_y: .1
-        MDFloatingActionButton:
-            type: 'small'
+        #MDFloatingActionButton:
+        #    type: 'small'
+        #    pos_hint: {"right": 1 - (10/root.width), "y": (10/fab_cont.height)}
+        #    icon: 'plus'
+        #    on_release:
+        #        root.add_events_to_selected_day()
+        MDIconButton:
+            md_bg_color: app.theme_cls.primary_color
             pos_hint: {"right": 1 - (10/root.width), "y": (10/fab_cont.height)}
             icon: 'plus'
             on_release:

@@ -2,7 +2,7 @@ from kivy.uix.popup import Popup
 from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.togglebutton import ToggleButton
 
-from test_main import DayTile
+from main import DayTile
 
 
 class EventManagerPopup(Popup):

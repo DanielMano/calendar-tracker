@@ -13,8 +13,8 @@ def create_date_picker_popup(self, year: int, month: int) -> Popup:
         separator_height=0,
         content=content,
         auto_dismiss=True,
-        size_hint=(None, None),
-        size=(500, 500),
+        size_hint=(0.9, 0.5),
+        # size=(500, 500),
     )
     return popup
 
