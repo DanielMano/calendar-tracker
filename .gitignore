@@ -130,3 +130,7 @@ dmypy.json
 .vscode/settings.json
 
 database.db
+
+test_main.py
+
+requirements.txt
