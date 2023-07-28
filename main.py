@@ -18,10 +18,14 @@ from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.label import Label
 from kivy.uix.popup import Popup
 
+from os import path
+from shutil import copy
+
 import calendar_data
 import database
 import date_picker_popup as dpp
 import day_event_manager_popup as manager_popup
+import android_storage
 
 # from timeit import default_timer as timer
 
@@ -49,7 +53,7 @@ class RootManager(BoxLayout):
         ) = calendar_data.get_today()
         self.month_names = calendar_data.get_month_names()
 
-        self.all_events_with_ids = database.get_events(conn)
+        self.all_events_with_ids = database.get_events(MDApp.get_running_app().conn)
         for event_id, name, hexcode in self.all_events_with_ids:
             self.all_events_with_ids_dict[(name, hexcode)] = event_id
 
@@ -217,7 +221,7 @@ class RootManager(BoxLayout):
         )
 
         day_tile.events = database.get_events_name_hexcode_by_day(
-            conn, day_tile.date_str
+            MDApp.get_running_app().conn, day_tile.date_str
         )
         # add colors to day_tile to signal specific event
         # if there are 8 or more events, replace the 8th with a '+' and dont display any more
@@ -333,12 +337,15 @@ class DayTile(MDFloatLayout):
 
     def add_event_to_db(self, event):
         database.create_date(
-            conn, (self.date_str, RootManager.all_events_with_ids_dict[event])
+            MDApp.get_running_app().conn,
+            (self.date_str, RootManager.all_events_with_ids_dict[event]),
         )
 
     def remove_event_from_db(self, event):
         database.delete_event_from_day_by_event_id(
-            conn, self.date_str, RootManager.all_events_with_ids_dict[event]
+            MDApp.get_running_app().conn,
+            self.date_str,
+            RootManager.all_events_with_ids_dict[event],
         )
 
 
@@ -346,15 +353,62 @@ class DayTileEvent(MDBoxLayout):
     pass
 
 
+class DatabasePrompt(BoxLayout):
+    def use_previous_db(self):
+        print("trying to use previous db")
+        app = MDApp.get_running_app()
+        if chooser.chooser_start():
+            copy(chooser.path, app.current_db_version)
+            app.conn = database.create_connection(app.current_db_version)
+
+        MDApp.get_running_app().root.swap_to_root_manager()
+
+    def use_default_db(self):
+        app = MDApp.get_running_app()
+        copy("database.db", app.current_db_version)
+        app.conn = database.create_connection(app.current_db_version)
+        app.root.swap_to_root_manager()
+
+
+class UberRoot(BoxLayout):
+    def __init__(self, pick_db: bool, **kwargs):
+        super().__init__(**kwargs)
+        if pick_db:
+            self.add_widget(DatabasePrompt())
+        else:
+            self.add_widget(RootManager())
+
+    def swap_to_root_manager(self):
+        self.clear_widgets()
+        self.add_widget(RootManager())
+
+
 class CalendarTrackerApp(MDApp):
+    conn = None
+    current_db_version = None
+
     def build(self):
         self.theme_cls.theme_style = "Dark"
         self.theme_cls.primary_palette = "Teal"
-        return RootManager()
+
+        self.current_db_version = "database_" + __version__ + ".db"
+        if path.exists(self.current_db_version):
+            print(self.current_db_version, "exists, proceed as normal")
+            self.conn = database.create_connection(self.current_db_version)
+        else:
+            print(self.current_db_version, "doesn't exist, trigger prompt")
+            # TODO prompt will ask between starting with default or using an existing db
+            # if picked use default, make copy of database.db and rename to current_db_verion
+            # if picked use existing, open picker, select old db version, copy and rename to current_db_version
+            return UberRoot(pick_db=True)
+
+        # return RootManager()
+        return UberRoot(pick_db=False)
 
 
 if __name__ == "__main__":
-    conn = database.create_connection("database.db")
+    # conn = database.create_connection("database.db")
+    chooser = android_storage.Storage()
     CalendarTrackerApp().run()
 
 '''from kivy.config import Config
