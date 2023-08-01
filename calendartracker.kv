@@ -4,6 +4,17 @@
     icon_color: "white"
     pos_hint: {"center_x": .5, "center_y": .5}
 
+<DatabasePrompt>:
+    orientation: 'vertical'
+    Label:
+        text: "Pick which database to use."
+    Button:
+        text: "Use the default database."
+        on_press: root.use_default_db()
+    Button:
+        text: "Use the database from a previous version of the app."
+        on_press: root.use_previous_db()
+
 <RootManager>:
     screen_manager: screen_manager
     orientation: 'vertical'

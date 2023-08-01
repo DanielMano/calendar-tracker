@@ -20,7 +20,7 @@ source.exclude_exts = spec,html,htm,gitattributes,gitignore
 icon.filename = calendar_icon.png
 presplash.filename = calendar_icon.png
 
-requirements = python3,kivy,kivymd,sqlite3
+requirements = python3,kivy,kivymd,sqlite3,androidstorage4kivy
 orientation = portrait
 
 # OSX Specific
