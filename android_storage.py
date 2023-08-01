@@ -9,7 +9,8 @@ def get_permissions():
 
 
 class Storage:
-    def __init__(self) -> None:
+    def __init__(self, root) -> None:
+        self.root = root
         if platform == "android":
             from androidstorage4kivy import SharedStorage, Chooser
 
@@ -23,12 +24,15 @@ class Storage:
         if platform == "android":
             self.chooser.choose_content("*/*")
             return True
+        else:
+            self.root.copied_db_path = "test change"
         return False
 
     def chooser_callback(self, shared_files):
         try:
             for shared_file in shared_files:
                 self.path = self.ss.copy_from_shared(shared_file)
+                self.root.copied_db_path = self.path
         except Exception as e:
             pass
 

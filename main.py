@@ -18,6 +18,8 @@ from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.label import Label
 from kivy.uix.popup import Popup
 
+from kivy.clock import Clock
+
 from os import path
 from shutil import copy
 
@@ -29,7 +31,7 @@ import android_storage
 
 # from timeit import default_timer as timer
 
-__version__ = "0.3.26.1"
+__version__ = "0.3.23.2"
 
 
 class RootManager(BoxLayout):
@@ -355,13 +357,9 @@ class DayTileEvent(MDBoxLayout):
 
 class DatabasePrompt(BoxLayout):
     def use_previous_db(self):
-        print("trying to use previous db")
+        print("main :: trying to use previous db")
         app = MDApp.get_running_app()
-        if chooser.chooser_start():
-            copy(chooser.path, app.current_db_version)
-            app.conn = database.create_connection(app.current_db_version)
-
-        MDApp.get_running_app().root.swap_to_root_manager()
+        app.chooser.chooser_start()
 
     def use_default_db(self):
         app = MDApp.get_running_app()
@@ -386,29 +384,47 @@ class UberRoot(BoxLayout):
 class CalendarTrackerApp(MDApp):
     conn = None
     current_db_version = None
+    chooser = None
+
+    def m(self, copied_db_path_value):
+        try:
+            copy(copied_db_path_value, self.current_db_version)
+            self.conn = database.create_connection(self.current_db_version)
+        except IOError as e:
+            print(e)
+
+        self.root.swap_to_root_manager()
+
+    @property
+    def copied_db_path(self):
+        return self._p
+
+    @copied_db_path.setter
+    def copied_db_path(self, value):
+        self._p = value
+        Clock.schedule_once(lambda dt: self.m(value), 2)
 
     def build(self):
         self.theme_cls.theme_style = "Dark"
         self.theme_cls.primary_palette = "Teal"
 
+        self.chooser = android_storage.Storage(root=self)
+
         self.current_db_version = "database_" + __version__ + ".db"
         if path.exists(self.current_db_version):
-            print(self.current_db_version, "exists, proceed as normal")
             self.conn = database.create_connection(self.current_db_version)
         else:
-            print(self.current_db_version, "doesn't exist, trigger prompt")
-            # TODO prompt will ask between starting with default or using an existing db
-            # if picked use default, make copy of database.db and rename to current_db_verion
-            # if picked use existing, open picker, select old db version, copy and rename to current_db_version
+            print("main :: ", self.current_db_version, "doesn't exist, trigger prompt")
             return UberRoot(pick_db=True)
 
-        # return RootManager()
         return UberRoot(pick_db=False)
+
+    def on_pause(self):
+        self.chooser.save_file(self.current_db_version, self.current_db_version)
+        return super().on_pause()
 
 
 if __name__ == "__main__":
-    # conn = database.create_connection("database.db")
-    chooser = android_storage.Storage()
     CalendarTrackerApp().run()
 
 '''from kivy.config import Config
