@@ -28,10 +28,11 @@ import database
 import date_picker_popup as dpp
 import day_event_manager_popup as manager_popup
 import android_storage
+import CustomSpeedDial
 
 # from timeit import default_timer as timer
 
-__version__ = "0.3.23.2"
+__version__ = "0.4.0.34"
 
 
 class RootManager(BoxLayout):
