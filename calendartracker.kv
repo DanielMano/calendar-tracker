@@ -16,6 +16,7 @@
         on_press: root.use_previous_db()
 
 <RootManager>:
+    id: rootmanager
     screen_manager: screen_manager
     orientation: 'vertical'
     md_bg_color: app.theme_cls.bg_normal
@@ -96,21 +97,17 @@
             row_force_default: True
             row_default_height: self.height / 8
 
-    MDFloatLayout:
-        id: fab_cont
-        size_hint_y: .1
-        #MDFloatingActionButton:
-        #    type: 'small'
-        #    pos_hint: {"right": 1 - (10/root.width), "y": (10/fab_cont.height)}
-        #    icon: 'plus'
-        #    on_release:
-        #        root.add_events_to_selected_day()
-        MDIconButton:
+    CustomSpeedDialFloatLayout:
+        id: speed_float
+        root: rootmanager
+        size_hint_y: 0.1
+
+        ShortOrLongMDIconButton:
+            id: base
+            root: speed_float
             md_bg_color: app.theme_cls.primary_color
-            pos_hint: {"right": 1 - (10/root.width), "y": (10/fab_cont.height)}
+            pos_hint: {"right": 1 - (10/root.width), "y": (10/speed_float.height)}
             icon: 'plus'
-            on_release:
-                root.add_events_to_selected_day()
 
 
 <CalendarScreen>:
