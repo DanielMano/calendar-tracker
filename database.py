@@ -222,6 +222,40 @@ def get_events(conn):
     return cursor.fetchall()
 
 
+def get_events_with_color_id(conn):
+    """Returns list of (event_id, name, hexcode, color_id)
+
+    Args:
+        conn (sqlite3.Connection): Connection to database
+
+    Returns:
+        list: Return all rows as a list where each row is a tuple of
+        (int: event_id, str: name, str: hexcode, int: color_id) where hexcode is
+        missing the #
+    """
+    sql = """
+        SELECT events.event_id, events.name, colors.hexcode, colors.color_id 
+        FROM events, colors
+        WHERE events.color_id = colors.color_id
+        """
+    cursor = conn.cursor()
+    cursor.execute(sql)
+    return cursor.fetchall()
+
+
+def check_if_hexcode_exists(conn, hexcode) -> int:
+    sql = """
+        select colors.color_id from colors where colors.hexcode=?
+        """
+    try:
+        cursor = conn.cursor()
+        cursor.execute(sql, (hexcode,))
+    except:
+        print("database.py :: could not check if hexcode exists")
+    finally:
+        return cursor.fetchone()
+
+
 def get_events_name_hexcode(conn):
     """Returns list of (name, hexcode)
 

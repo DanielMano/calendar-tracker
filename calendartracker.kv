@@ -252,3 +252,39 @@
             text: 'Confirm'
             on_press:
                 root.confirm_dismiss()
+
+<EventsInDatabaseEditor>:
+    orientation: 'vertical'
+    md_bg_color: [0.7, 0.3, 0.1, 1]
+
+    Label:
+        text: 'Events in Database'
+
+    MDList:
+        id: event_list
+
+    Label:
+
+<NewEventContent>:
+
+    MDTextField:
+        id: event_name
+        size_hint: 0.8, None
+        pos_hint: {'x': 0.1, 'y': 0.875}
+        hint_text: "New event name"
+        on_text_validate: root.on_return(self)
+
+    ColorPicker:
+        id: clr_picker
+        size_hint: 0.9, 0.85
+        pos_hint: {'x': 0.05, 'y': 0}
+
+    MDIconButton:
+        icon: 'cancel'
+        pos_hint: {'x': 0.775, 'y': 0}
+        on_release: root.popup.my_close()
+
+    MDIconButton:
+        icon: 'check'
+        pos_hint: {'x': 0.875, 'y': 0}
+        on_release: root.my_confirm()
