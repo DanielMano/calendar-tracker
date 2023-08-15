@@ -222,7 +222,7 @@ def get_events(conn):
     return cursor.fetchall()
 
 
-def get_events_with_color_id(conn):
+def get_events_with_color_id(conn: sqlite3.Connection):
     """Returns list of (event_id, name, hexcode, color_id)
 
     Args:

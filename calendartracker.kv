@@ -280,10 +280,12 @@
 
     MDIconButton:
         icon: 'cancel'
-        pos_hint: {'x': 0.775, 'y': 0}
+        icon_size: "20sp"
+        pos_hint: {'x': 1 - (self.width / root.width), 'y': 0}
         on_release: root.popup.my_close()
 
     MDIconButton:
         icon: 'check'
-        pos_hint: {'x': 0.875, 'y': 0}
+        icon_size: "20sp"
+        pos_hint: {'x': 1 - (2 * self.width / root.width), 'y': 0}
         on_release: root.my_confirm()

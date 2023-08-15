@@ -1,8 +1,12 @@
 from __future__ import annotations
 from kivy.config import Config
 
-Config.set("graphics", "width", "500")
-Config.set("graphics", "height", "1000")
+# Config.set("graphics", "width", "500")
+# Config.set("graphics", "height", "1000")
+Config.set("graphics", "width", "360")
+Config.set("graphics", "height", "780")
+# phone documentation says 1080 x 2340 with ~425 ppi density
+# phone itself says 1080 X 2115
 
 from kivymd.app import MDApp
 from kivymd.uix.boxlayout import MDBoxLayout
