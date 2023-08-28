@@ -252,3 +252,70 @@
             text: 'Confirm'
             on_press:
                 root.confirm_dismiss()
+
+<EventsInDatabaseEditor>:
+    orientation: 'vertical'
+    md_bg_color: [0.7, 0.3, 0.1, 1]
+
+    Label:
+        text: 'Events in Database'
+        size_hint_y: .1
+
+    MDList:
+        id: event_list
+        size_hint_y: .7
+
+    MDIconButton:
+        icon: 'keyboard-return'
+        on_release: root.root.swap_to_root_manager()
+
+<EditEventContent>:
+    MDTextField:
+        id: event_name
+        size_hint: 0.8, None
+        pos_hint: {'x': 0.1, 'y': 0.875}
+        hint_text: "Rename event"
+        text: root.name
+        helper_text: root.helper_text
+        helper_text_mode: "on_error"
+        on_text_validate: root.check_error(self)
+
+    # Color picker is added in python because giving it a color to start off
+    #with in python doesn't work correctly.
+
+    MDIconButton:
+        icon: 'cancel'
+        icon_size: "20sp"
+        pos_hint: {'x': 1 - (self.width / root.width), 'y': 0}
+        on_release: root.edit_cancel()
+
+    MDIconButton:
+        icon: 'check'
+        icon_size: "20sp"
+        pos_hint: {'x': 1 - (2 * self.width / root.width), 'y': 0}
+        on_release: root.edit_confirm()
+
+<NewEventContent>:
+
+    MDTextField:
+        id: event_name
+        size_hint: 0.8, None
+        pos_hint: {'x': 0.1, 'y': 0.875}
+        hint_text: "New event name"
+
+    ColorPicker:
+        id: clr_picker
+        size_hint: 0.9, 0.85
+        pos_hint: {'x': 0.05, 'y': 0}
+
+    MDIconButton:
+        icon: 'cancel'
+        icon_size: "20sp"
+        pos_hint: {'x': 1 - (self.width / root.width), 'y': 0}
+        on_release: root.popup.my_cancel()
+
+    MDIconButton:
+        icon: 'check'
+        icon_size: "20sp"
+        pos_hint: {'x': 1 - (2 * self.width / root.width), 'y': 0}
+        on_release: root.my_confirm()

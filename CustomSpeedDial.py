@@ -84,11 +84,11 @@ class CustomSpeedDialFloatLayout(MDFloatLayout):
         """
         match instance.icon:
             case "check":
-                pass
+                MDApp.get_running_app().root.swap_to_events_editor(),
             case "cross":
                 pass
             case "plus":
-                pass
+                self.root.add_events_to_selected_day()
 
     def long_action(self, instance):
         """Called when the base_button is long held. Sets all buttons in the speed dial
