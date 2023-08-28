@@ -259,11 +259,41 @@
 
     Label:
         text: 'Events in Database'
+        size_hint_y: .1
 
     MDList:
         id: event_list
+        size_hint_y: .7
 
-    Label:
+    MDIconButton:
+        icon: 'keyboard-return'
+        on_release: root.root.swap_to_root_manager()
+
+<EditEventContent>:
+    MDTextField:
+        id: event_name
+        size_hint: 0.8, None
+        pos_hint: {'x': 0.1, 'y': 0.875}
+        hint_text: "Rename event"
+        text: root.name
+        helper_text: root.helper_text
+        helper_text_mode: "on_error"
+        on_text_validate: root.check_error(self)
+
+    # Color picker is added in python because giving it a color to start off
+    #with in python doesn't work correctly.
+
+    MDIconButton:
+        icon: 'cancel'
+        icon_size: "20sp"
+        pos_hint: {'x': 1 - (self.width / root.width), 'y': 0}
+        on_release: root.edit_cancel()
+
+    MDIconButton:
+        icon: 'check'
+        icon_size: "20sp"
+        pos_hint: {'x': 1 - (2 * self.width / root.width), 'y': 0}
+        on_release: root.edit_confirm()
 
 <NewEventContent>:
 
@@ -282,7 +312,7 @@
         icon: 'cancel'
         icon_size: "20sp"
         pos_hint: {'x': 1 - (self.width / root.width), 'y': 0}
-        on_release: root.popup.my_close()
+        on_release: root.popup.my_cancel()
 
     MDIconButton:
         icon: 'check'

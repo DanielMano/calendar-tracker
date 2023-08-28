@@ -18,7 +18,11 @@ class EventManagerPopup(Popup):
         self.day_tile = day_tile
         self.auto_dismiss = False
 
-    def update_and_open(self, day_tile: DayTile):
+    def update_and_open(self, day_tile: DayTile, all_events: list):
+        # Update all_events in case a new event was created dynamically
+        self.all_events = all_events
+        self.all_events_dict = dict(all_events)
+
         self.day_tile = day_tile
         self.title = self.day_tile.date_str
         if self.day_tile.events:

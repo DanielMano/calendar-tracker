@@ -4,11 +4,12 @@ from kivymd.app import MDApp
 from kivymd.uix.boxlayout import MDBoxLayout
 from kivymd.uix.floatlayout import MDFloatLayout
 from kivymd.uix.list import OneLineIconListItem, IconLeftWidgetWithoutTouch
+from kivymd.toast import toast
 
 from kivy.uix.colorpicker import ColorPicker
 from kivy.uix.button import Button
 from kivy.uix.popup import Popup
-from kivy.properties import ObjectProperty
+from kivy.properties import ObjectProperty, StringProperty
 
 import database
 
@@ -17,9 +18,21 @@ class EventsInDatabaseEditor(MDBoxLayout):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.root = MDApp.get_running_app().root
+
+        self.create_new_event_item = OneLineIconListItem(
+            IconLeftWidgetWithoutTouch(
+                icon="plus",
+            ),
+            text="CREATE NEW EVENT",
+            on_release=self.new_event_callback,
+        )
+
         self.current_events = database.get_events_with_color_id(
             MDApp.get_running_app().conn
         )
+
+        self.ids.event_list.clear_widgets()
+
         for event_id, name, hexcode, color_id in self.current_events:
             self.ids.event_list.add_widget(
                 CustomListItem(
@@ -29,91 +42,168 @@ class EventsInDatabaseEditor(MDBoxLayout):
                         icon_color=hexcode,
                     ),
                     text=name,
-                    on_release=self.list_callback,
+                    # on_release=self.list_callback,
+                    on_release=self.edit_event_callback,
                     hexcode=hexcode,
                     e_id=event_id,
                     c_id=color_id,
                 )
             )
 
-        self.ids.event_list.add_widget(
-            OneLineIconListItem(
-                IconLeftWidgetWithoutTouch(
-                    icon="plus",
-                ),
-                text="CREATE NEW EVENT",
-                on_release=self.new_event_callback,
-            )
-        )
+        self.ids.event_list.add_widget(self.create_new_event_item)
 
-    def list_callback(self, instance: CustomListItem):
-        # print(self, instance.name, instance.hex_color, instance.rgba_color)
-        # TODO bring up popup that has option to edit name, edit color, or delete
-        # deleting might be bad though because instances of it might already be on days in database, then would have to decide how to handle either just removing those or what
-        # KivyMD has MDColorPicker
-        # MDColorPicker(size_hint=(0.9, 0.6), default_color=instance.rgba_color).open()
-        # kivy has ColorPicker was looks uglier, but i think might actually be functionally better
+    def add_new_item(self, event_item):
+        self.ids.event_list.remove_widget(self.create_new_event_item)
+        self.ids.event_list.add_widget(event_item)
+        self.ids.event_list.add_widget(self.create_new_event_item)
 
-        clr_picker = ColorPicker(color=instance.rgba_color)
-
-        def get_clr_picker_color(btn):
-            try:
-                (new_c_id,) = database.check_if_hexcode_exists(
-                    MDApp.get_running_app().conn, clr_picker.hex_color
-                )
-            except:
-                new_c_id = None
-
-            if new_c_id is not None:
-                print("UPDATE", instance.c_id, "to", new_c_id)
-            else:
-                print(
-                    "CREATE new color with hexcode",
-                    clr_picker.hex_color,
-                    "and swap",
-                    instance.c_id,
-                    "to that new c_id",
-                )
-
-                print(
-                    "OR change hexcode of",
-                    instance.c_id,
-                    "from",
-                    instance.hex_color,
-                    "to",
-                    clr_picker.hex_color,
-                )
-
-            instance.left_icon.icon_color = clr_picker.color
-
-        content_layout = MDBoxLayout(orientation="vertical")
-        content_layout.add_widget(
-            Button(text=instance.name, on_release=get_clr_picker_color)
-        )
-
-        content_layout.add_widget(clr_picker)
-
-        Popup(
-            title="Edit Event",
-            content=content_layout,
-            size_hint=(0.9, 0.7),
-        ).open()
+    def edit_event_callback(self, instance: CustomListItem):
+        EditEventPopup(caller=self, list_item=instance).open()
 
     def new_event_callback(self, instance: OneLineIconListItem):
-        content_layout = MDBoxLayout(orientation="vertical")
+        NewEventPopup(caller=self).my_open()
 
-        NewEventPopup().my_open()
 
-        print("create new event")
+class EditEventPopup(Popup):
+    def __init__(self, caller, list_item, **kwargs):
+        self.caller: EventsInDatabaseEditor = caller
+        self.event: CustomListItem = list_item
+        super().__init__(**kwargs)
+        self.title = "Edit Event"
+        self.title_align = "center"
+        self.size_hint = (0.9, 0.7)
+
+        self.content = EditEventContent(popup=self, name=self.event.name)
+
+
+class EditEventContent(MDFloatLayout):
+    popup: EditEventPopup = ObjectProperty(None)
+    name = StringProperty(None)
+
+    helper_text = StringProperty("")
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        self.color_picker = ColorPicker(
+            size_hint=(0.9, 0.85),
+            pos_hint={"x": 0.05, "y": 0},
+            color=self.popup.event.rgba_color,
+        )
+
+        self.add_widget(self.color_picker)
+
+    def edit_confirm(self):
+        self.check_error(self.ids.event_name)
+        if self.ids.event_name.error:
+            # error don't do anything
+            pass
+        else:
+            if self.popup.event.name != self.ids.event_name.text:
+                if self.popup.event.hex_color != self.color_picker.hex_color:
+                    # edit event name and hex color
+                    print("edit name and hex color, e_id:", self.popup.event.e_id)
+                    # TODO: don't really like how this is handled, this allows for multiple events to share color
+                    try:
+                        (new_c_id,) = database.check_if_hexcode_exists(
+                            MDApp.get_running_app().conn, self.color_picker.hex_color
+                        )
+                    except:
+                        new_c_id = None
+
+                    if new_c_id is not None:
+                        # Change c_id associated with existing e_id, and change name
+                        database.edit_event_name_and_color(
+                            MDApp.get_running_app().conn,
+                            self.ids.event_name.text,
+                            new_c_id,
+                            self.popup.event.e_id,
+                        )
+                    else:
+                        # Change hexcode associated with existing c_id
+                        database.edit_color_hexcode(
+                            MDApp.get_running_app().conn,
+                            self.color_picker.hex_color,
+                            self.popup.event.c_id,
+                        )
+                        # Change name
+                        database.edit_event_name(
+                            MDApp.get_running_app().conn,
+                            self.ids.event_name.text,
+                            self.popup.event.e_id,
+                        )
+                else:
+                    # edit just event name
+                    database.edit_event_name(
+                        MDApp.get_running_app().conn,
+                        self.ids.event_name.text,
+                        self.popup.event.e_id,
+                    )
+            else:
+                if self.popup.event.hex_color != self.color_picker.hex_color:
+                    # edit just hex color
+                    # Search db to see if that color already exists
+                    # TODO: don't really like how this is handled, this allows for multiple events to share color
+                    try:
+                        (new_c_id,) = database.check_if_hexcode_exists(
+                            MDApp.get_running_app().conn, self.color_picker.hex_color
+                        )
+                    except:
+                        new_c_id = None
+
+                    if new_c_id is not None:
+                        # Change c_id associated with existing e_id
+                        database.edit_event_color(
+                            MDApp.get_running_app().conn,
+                            new_c_id,
+                            self.popup.event.e_id,
+                        )
+                    else:
+                        # Change hexcode associated with existing c_id
+                        database.edit_color_hexcode(
+                            MDApp.get_running_app().conn,
+                            self.color_picker.hex_color,
+                            self.popup.event.c_id,
+                        )
+                else:
+                    # do nothing
+                    pass
+
+            # Update list item atts
+            self.popup.event.left_icon.icon_color = self.color_picker.color
+            self.popup.event.hex_color = self.color_picker.hex_color
+            self.popup.event.rgba_color = self.color_picker.color
+            self.popup.event.name = self.ids.event_name.text
+            self.popup.event.text = self.ids.event_name.text
+            self.popup.dismiss()
+
+    def check_error(self, textfield):
+        self.name_changed = True
+        textfield.text = textfield.text.strip()
+        if textfield.text == "":
+            self.helper_text = "Name cannot be an empty string"
+            textfield.error = True
+        elif textfield.text == self.popup.event.name:
+            # This is fine, do nothing
+            self.name_changed = False
+            pass
+        else:
+            if database.check_if_event_name_exists(
+                MDApp.get_running_app().conn, self.ids.event_name.text
+            ):
+                self.helper_text = "Name already in use"
+                self.ids.event_name.error = True
+
+    def edit_cancel(self):
+        self.popup.dismiss()
 
 
 class NewEventPopup(Popup):
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
-
+    def __init__(self, caller, **kwargs):
+        self.caller = caller
+        super(NewEventPopup, self).__init__(**kwargs)
         self.title = "Add New Event To Database"
         self.title_align = "center"
-        # self.title_size = "30sp"
         self.size_hint = (0.9, 0.7)
 
         content = NewEventContent(popup=self)
@@ -122,7 +212,23 @@ class NewEventPopup(Popup):
     def my_open(self):
         self.open()
 
-    def my_close(self):
+    def my_close(self, name, hexcode, e_id, c_id):
+        new_item = CustomListItem(
+            IconLeftWidgetWithoutTouch(
+                icon="circle",
+                theme_icon_color="Custom",
+                icon_color=hexcode,
+            ),
+            text=name,
+            on_release=self.caller.list_callback,
+            hexcode=hexcode,
+            e_id=e_id,
+            c_id=c_id,
+        )
+        self.caller.add_new_item(new_item)
+        self.dismiss()
+
+    def my_cancel(self):
         self.dismiss()
 
 
@@ -131,15 +237,30 @@ class NewEventContent(MDFloatLayout):
 
     def my_confirm(self):
         if self.ids.event_name.text != "":
-            print("Name of event:", self.ids.event_name.text)
+            name = self.ids.event_name.text
+            hex_code = self.ids.clr_picker.hex_color
 
-            print("Color of event:", self.ids.clr_picker.hex_color)
+            # If an event with that name already exists, warn with toast and do nothing.
+            if database.check_if_event_name_exists(MDApp.get_running_app().conn, name):
+                toast("Event with that name already exists")
+                return
 
-            # TODO use these things to first search db for hex_color, if there use c_id for creation of new event
-            # if hex_color not in db, create a new color with that code, and use the new c_id for creation of the new event
-            # then insert that event into the event list
+            # Use these things to first search db for hex_color, if in db get existing c_id
+            try:
+                (c_id,) = database.check_if_hexcode_exists(
+                    MDApp.get_running_app().conn, hex_code
+                )
+            except:
+                # if hex_color not in db, create a new color with that code, get new c_id
+                c_id = database.create_color(MDApp.get_running_app().conn, hex_code)
 
-            self.popup.my_close()
+            # Create new event
+            e_id = database.create_event(MDApp.get_running_app().conn, (name, c_id))
+
+            self.popup.my_close(name, hex_code, e_id, c_id)
+
+        else:
+            toast("Please provide a name")
 
 
 class CustomListItem(OneLineIconListItem):

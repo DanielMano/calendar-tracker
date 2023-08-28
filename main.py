@@ -38,7 +38,7 @@ from events_editor import EventsInDatabaseEditor
 
 # from timeit import default_timer as timer
 
-__version__ = "0.4.1.33"
+__version__ = "0.4.2.33"
 
 
 class RootManager(BoxLayout):
@@ -63,14 +63,18 @@ class RootManager(BoxLayout):
         ) = calendar_data.get_today()
         self.month_names = calendar_data.get_month_names()
 
+        self.assign_all_events()
+
+        self.create_month_screen()
+
+    def assign_all_events(self):
         self.all_events_with_ids = database.get_events(MDApp.get_running_app().conn)
         for event_id, name, hexcode in self.all_events_with_ids:
             self.all_events_with_ids_dict[(name, hexcode)] = event_id
 
+        self.all_events.clear()
         for _, name, hexcode in self.all_events_with_ids:
             self.all_events.append((name, hexcode))
-
-        self.create_month_screen()
 
     def prev_year(self):
         self.active_year -= 1
@@ -288,7 +292,7 @@ class RootManager(BoxLayout):
             else self.event_manager_popup
         )
         self.event_manager_popup.bind(on_dismiss=self.set_lower_layout)
-        self.event_manager_popup.update_and_open(self.selected_day)
+        self.event_manager_popup.update_and_open(self.selected_day, self.all_events)
 
     def hex_to_rgba(self, hexcode):
         """Convert hexcode color to rgba tuple
@@ -399,6 +403,8 @@ class UberRoot(MDFloatLayout):
 
         if self.root_manager is None:
             self.root_manager = RootManager()
+
+        self.root_manager.assign_all_events()
 
         self.add_widget(self.root_manager)
 

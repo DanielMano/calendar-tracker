@@ -243,7 +243,16 @@ def get_events_with_color_id(conn: sqlite3.Connection):
     return cursor.fetchall()
 
 
-def check_if_hexcode_exists(conn, hexcode) -> int:
+def check_if_hexcode_exists(conn: sqlite3.Connection, hexcode: str) -> int:
+    """Search colors table to check if color with specific hexcode exists.
+
+    Args:
+        conn (sqlite3.Connection): db connection
+        hexcode (str): Hexcode to be searched for
+
+    Returns:
+        int: 1 if found, None if not
+    """
     sql = """
         select colors.color_id from colors where colors.hexcode=?
         """
@@ -252,6 +261,30 @@ def check_if_hexcode_exists(conn, hexcode) -> int:
         cursor.execute(sql, (hexcode,))
     except:
         print("database.py :: could not check if hexcode exists")
+    finally:
+        return cursor.fetchone()
+
+
+def check_if_event_name_exists(conn: sqlite3.Connection, name: str) -> int:
+    """Search events table to check if event with specific name exists.
+
+    Args:
+        conn (sqlite3.Connection): db connection
+        name (str): Name to be searched for
+
+    Returns:
+        int: 1 if found, None if not
+    """
+    sql = """
+        SELECT event_id
+        FROM events
+        WHERE name LIKE ?
+        """
+    try:
+        cursor = conn.cursor()
+        cursor.execute(sql, (name,))
+    except:
+        print("database.py :: could not check if event name exists")
     finally:
         return cursor.fetchone()
 
@@ -312,6 +345,104 @@ def delete_event_from_day_by_event_id(conn, day_string, e_id):
         (
             day_string,
             e_id,
+        ),
+    )
+    conn.commit()
+
+
+def edit_event_color(conn: sqlite3.Connection, c_id: int, e_id: int):
+    """Edit color associated with event
+
+    Args:
+        conn (sqlite3.Connection): db connection
+        c_id (int): color_id of new color
+        e_id (int): event_id of event to be edited
+    """
+    sql = """
+        UPDATE events
+        SET color_id = ?
+        WHERE event_id = ?
+        """
+    cursor = conn.cursor()
+    cursor.execute(
+        sql,
+        (
+            c_id,
+            e_id,
+        ),
+    )
+    conn.commit()
+
+
+def edit_event_name(conn: sqlite3.Connection, name: str, e_id: int):
+    """Edit name of event
+
+    Args:
+        conn (sqlite3.Connection): db connection
+        name (str): New name of event
+        e_id (int): event_id of event to be edited
+    """
+    sql = """
+        UPDATE events
+        SET name = ?
+        WHERE event_id = ?
+        """
+    cursor = conn.cursor()
+    cursor.execute(
+        sql,
+        (
+            name,
+            e_id,
+        ),
+    )
+    conn.commit()
+
+
+def edit_event_name_and_color(conn: sqlite3.Connection, name: str, c_id, e_id):
+    """Edit both name and color associated with event
+
+    Args:
+        conn (sqlite3.Connection): db connection
+        name (str): New name of event
+        c_id (int): color_id of new color of event
+        e_id (int): event_id of event to be changed
+    """
+    sql = """
+        UPDATE events
+        SET name = ?, color_id = ?
+        WHERE event_id = ?
+        """
+    cursor = conn.cursor()
+    cursor.execute(
+        sql,
+        (
+            name,
+            c_id,
+            e_id,
+        ),
+    )
+    conn.commit()
+
+
+def edit_color_hexcode(conn: sqlite3.Connection, hexcode: str, c_id: int):
+    """Edit the hexcode value associated with a color
+
+    Args:
+        conn (sqlite3.Connection): db connection
+        hexcode (str): hexcode value
+        c_id (int): color_id of color to be edited
+    """
+    sql = """
+        UPDATE colors
+        SET hexcode = ?
+        WHERE color_id = ?
+        """
+    cursor = conn.cursor()
+    cursor.execute(
+        sql,
+        (
+            hexcode,
+            c_id,
         ),
     )
     conn.commit()
