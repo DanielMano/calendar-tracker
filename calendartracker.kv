@@ -302,6 +302,9 @@
         size_hint: 0.8, None
         pos_hint: {'x': 0.1, 'y': 0.875}
         hint_text: "New event name"
+        helper_text: root.helper_text
+        helper_text_mode: "on_error"
+        on_text_validate: root.check_error(self)
 
     ColorPicker:
         id: clr_picker

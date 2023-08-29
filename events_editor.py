@@ -189,10 +189,10 @@ class EditEventContent(MDFloatLayout):
             pass
         else:
             if database.check_if_event_name_exists(
-                MDApp.get_running_app().conn, self.ids.event_name.text
+                MDApp.get_running_app().conn, textfield.text
             ):
                 self.helper_text = "Name already in use"
-                self.ids.event_name.error = True
+                textfield.error = True
 
     def edit_cancel(self):
         self.popup.dismiss()
@@ -220,7 +220,7 @@ class NewEventPopup(Popup):
                 icon_color=hexcode,
             ),
             text=name,
-            on_release=self.caller.list_callback,
+            on_release=self.caller.edit_event_callback,
             hexcode=hexcode,
             e_id=e_id,
             c_id=c_id,
@@ -234,8 +234,10 @@ class NewEventPopup(Popup):
 
 class NewEventContent(MDFloatLayout):
     popup: NewEventPopup = ObjectProperty(None)
+    helper_text = StringProperty("test")
 
     def my_confirm(self):
+        self.check_error(self.ids.event_name)
         if self.ids.event_name.text != "":
             name = self.ids.event_name.text
             hex_code = self.ids.clr_picker.hex_color
@@ -261,6 +263,18 @@ class NewEventContent(MDFloatLayout):
 
         else:
             toast("Please provide a name")
+
+    def check_error(self, textfield):
+        self.name_changed = True
+        textfield.text = textfield.text.strip()
+        if textfield.text == "":
+            self.helper_text = "Name cannot be an empty string"
+            textfield.error = True
+        elif database.check_if_event_name_exists(
+            MDApp.get_running_app().conn, textfield.text
+        ):
+            self.helper_text = "Name already in use"
+            textfield.error = True
 
 
 class CustomListItem(OneLineIconListItem):
