@@ -38,7 +38,7 @@ from events_editor import EventsInDatabaseEditor
 
 # from timeit import default_timer as timer
 
-__version__ = "0.4.3.01"
+__version__ = "0.4.3.14"
 
 
 class RootManager(BoxLayout):
